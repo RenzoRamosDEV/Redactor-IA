@@ -1,0 +1,9 @@
+# Redactor IA - Comandos
+
+## Levantar backend y frontend
+
+cd /home/renzo-ramos/Workspace/Renzo/redactor-ia && node backend/src/server.js & npm run dev --prefix frontend
+
+## Parar backend y frontend
+
+pkill -f "node.*server.js" && pkill -f "vite"

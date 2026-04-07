@@ -1,0 +1,242 @@
+export default function RedactorIAVisual() {
+  const attemptsUsed = 2;
+  const maxAttempts = 5;
+  const attemptsLeft = maxAttempts - attemptsUsed;
+  const charCount = 287;
+  const charLimit = 500;
+  const progress = (charCount / charLimit) * 100;
+
+  const tones = [
+    "Mejorar redacción",
+    "Más formal",
+    "Más divertido",
+    "Más casual",
+    "Más profesional",
+    "Más directo",
+    "Más persuasivo",
+    "Más creativo",
+  ];
+
+  return (
+    <div className="min-h-screen bg-slate-50 text-slate-900 p-6 md:p-10">
+      <div className="mx-auto max-w-7xl">
+        <div className="mb-8 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+          <div>
+            <span className="inline-flex items-center rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-600 shadow-sm">
+              Demo visual · Sin funcionalidad real
+            </span>
+            <h1 className="mt-4 text-3xl md:text-5xl font-semibold tracking-tight">
+              Redactor IA de textos
+            </h1>
+            <p className="mt-3 max-w-2xl text-sm md:text-base text-slate-600 leading-7">
+              Interfaz moderna para escribir, mejorar y reformular textos con distintos tonos.
+              Todo el flujo mostrado aquí es únicamente visual.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3 md:w-auto">
+            <div className="rounded-2xl bg-white px-4 py-3 shadow-sm ring-1 ring-slate-200">
+              <p className="text-xs text-slate-500">Intentos restantes</p>
+              <p className="mt-1 text-2xl font-semibold">{attemptsLeft}/{maxAttempts}</p>
+            </div>
+            <div className="rounded-2xl bg-white px-4 py-3 shadow-sm ring-1 ring-slate-200">
+              <p className="text-xs text-slate-500">Tiempo de espera</p>
+              <p className="mt-1 text-2xl font-semibold">15 min</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid gap-6 lg:grid-cols-[1.5fr_0.9fr]">
+          <section className="rounded-3xl bg-white p-5 md:p-6 shadow-sm ring-1 ring-slate-200">
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <h2 className="text-xl font-semibold">Escribe tu texto</h2>
+                  <p className="mt-1 text-sm text-slate-500">
+                    Máximo 500 caracteres por intento.
+                  </p>
+                </div>
+
+                <div className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-2 text-sm text-slate-600">
+                  <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
+                  Listo para redactar
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3">
+                <textarea
+                  readOnly
+                  value="Hola, quería pedir información sobre el proyecto y saber si podéis ayudarme a dejar este texto mejor redactado para enviarlo por correo a un cliente potencial."
+                  className="h-48 w-full resize-none rounded-2xl border border-slate-200 bg-white px-4 py-4 text-sm leading-6 text-slate-700 outline-none"
+                />
+
+                <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="w-full max-w-xs">
+                    <div className="mb-2 flex items-center justify-between text-xs text-slate-500">
+                      <span>Caracteres usados</span>
+                      <span>{charCount}/{charLimit}</span>
+                    </div>
+                    <div className="h-2 overflow-hidden rounded-full bg-slate-200">
+                      <div
+                        className="h-full rounded-full bg-slate-900"
+                        style={{ width: `${progress}%` }}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-2">
+                    <button className="rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50">
+                      Limpiar
+                    </button>
+                    <button className="rounded-2xl bg-slate-900 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition hover:opacity-95">
+                      Generar texto
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid gap-3 md:grid-cols-3">
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                  <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Uso diario</p>
+                  <p className="mt-2 text-sm text-slate-700">Dispones de 5 pruebas antes de entrar en espera.</p>
+                </div>
+                <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4">
+                  <p className="text-xs font-medium uppercase tracking-wide text-amber-700">Aviso</p>
+                  <p className="mt-2 text-sm text-amber-800">Cuando se agoten los intentos, se bloqueará temporalmente el envío.</p>
+                </div>
+                <div className="rounded-2xl border border-sky-200 bg-sky-50 p-4">
+                  <p className="text-xs font-medium uppercase tracking-wide text-sky-700">Consejo</p>
+                  <p className="mt-2 text-sm text-sky-800">Prueba distintos tonos para comparar resultados visualmente.</p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <aside className="rounded-3xl bg-white p-5 md:p-6 shadow-sm ring-1 ring-slate-200">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <h2 className="text-xl font-semibold">Configuración del estilo</h2>
+                <p className="mt-1 text-sm text-slate-500">
+                  Elige cómo quieres que se vea el texto generado.
+                </p>
+              </div>
+              <div className="rounded-full border border-slate-200 px-3 py-1 text-xs text-slate-500">
+                Visual
+              </div>
+            </div>
+
+            <div className="mt-5 space-y-5">
+              <div>
+                <p className="mb-3 text-sm font-medium text-slate-700">Tono principal</p>
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+                  {tones.map((tone, index) => (
+                    <button
+                      key={tone}
+                      className={`rounded-2xl border px-4 py-3 text-left text-sm transition ${
+                        index === 0
+                          ? "border-slate-900 bg-slate-900 text-white shadow-sm"
+                          : "border-slate-200 bg-slate-50 text-slate-700 hover:bg-white"
+                      }`}
+                    >
+                      {tone}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                <p className="text-sm font-medium text-slate-700">Nivel de intensidad</p>
+                <div className="mt-4 flex items-center gap-3">
+                  <span className="text-xs text-slate-500">Suave</span>
+                  <div className="relative h-2 flex-1 rounded-full bg-slate-200">
+                    <div className="absolute left-0 top-0 h-2 w-2/3 rounded-full bg-slate-900" />
+                    <div className="absolute left-[66%] top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-4 border-white bg-slate-900 shadow" />
+                  </div>
+                  <span className="text-xs text-slate-500">Alto</span>
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-slate-200 p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-slate-700">Mantener longitud</p>
+                    <p className="text-xs text-slate-500">Evita que el texto crezca demasiado</p>
+                  </div>
+                  <div className="flex h-7 w-12 items-center rounded-full bg-slate-900 px-1">
+                    <div className="ml-auto h-5 w-5 rounded-full bg-white" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-dashed border-slate-300 p-4">
+                <p className="text-sm font-medium text-slate-700">Instrucción extra</p>
+                <div className="mt-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm text-slate-400">
+                  Ej.: Haz que suene más cercano y convincente, pero manteniendo un tono profesional.
+                </div>
+              </div>
+            </div>
+          </aside>
+        </div>
+
+        <section className="mt-6 rounded-3xl bg-white p-5 md:p-6 shadow-sm ring-1 ring-slate-200">
+          <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+            <div>
+              <h2 className="text-xl font-semibold">Resultado generado</h2>
+              <p className="mt-1 text-sm text-slate-500">
+                Vista previa del texto mejorado por la IA.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <div className="inline-flex items-center gap-2 rounded-full bg-amber-50 px-3 py-2 text-xs font-medium text-amber-700 ring-1 ring-amber-200">
+                <span className="h-2 w-2 rounded-full bg-amber-500 animate-pulse" />
+                Generando respuesta...
+              </div>
+              <button className="rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50">
+                Copiar texto
+              </button>
+            </div>
+          </div>
+
+          <div className="mt-5 grid gap-4 lg:grid-cols-[1.15fr_0.85fr]">
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+              <p className="text-sm leading-7 text-slate-700">
+                Hola, me gustaría solicitar información sobre el proyecto y conocer de qué manera podríais ayudarme a mejorar este mensaje para presentarlo correctamente por correo a un posible cliente. Busco una redacción más clara, profesional y convincente.
+              </p>
+            </div>
+
+            <div className="space-y-3">
+              <div className="rounded-2xl border border-slate-200 p-4">
+                <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Estado del sistema</p>
+                <div className="mt-3 space-y-2">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-slate-600">Motor de redacción</span>
+                    <span className="font-medium text-emerald-600">Activo</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-slate-600">Filtro de tono</span>
+                    <span className="font-medium text-slate-900">Profesional</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-slate-600">Tiempo estimado</span>
+                    <span className="font-medium text-slate-900">1.2 s</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-rose-200 bg-rose-50 p-4">
+                <p className="text-sm font-medium text-rose-700">Simulación de bloqueo</p>
+                <p className="mt-2 text-sm leading-6 text-rose-800">
+                  Has usado 5 de 5 intentos. Debes esperar 15 minutos para volver a generar texto.
+                </p>
+                <div className="mt-3 h-2 overflow-hidden rounded-full bg-rose-200">
+                  <div className="h-full w-4/5 rounded-full bg-rose-500" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  );
+}
