@@ -3,7 +3,7 @@ import Header from '../components/Header';
 import TextInputCard from '../components/TextInputCard';
 import ToneSelectorCard from '../components/ToneSelectorCard';
 import ResultCard from '../components/ResultCard';
-import { rewriteText } from '../services/api';
+import { rewriteText, getLimits } from '../services/api';
 import { lightTheme, darkTheme } from '../theme';
 
 const WINDOW_LIMIT = 8;
@@ -50,6 +50,11 @@ export default function Home() {
   });
 
   const isBlocked = limits.blockedBy !== null;
+
+  // Load initial limits from backend on mount
+  useEffect(() => {
+    getLimits().then(setLimits).catch(err => console.error('Error loading limits:', err));
+  }, []);
 
   // Auto-clear block once reset time passes (client-side optimistic unlock)
   useEffect(() => {

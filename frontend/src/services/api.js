@@ -1,5 +1,11 @@
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
+export async function getLimits() {
+  const response = await fetch(`${API_URL}/api/limits`);
+  const data = await response.json();
+  return data.limits;
+}
+
 export async function rewriteText({ text, tone, intensity, keepLength, extraInstruction }) {
   const response = await fetch(`${API_URL}/api/rewrite`, {
     method: 'POST',
