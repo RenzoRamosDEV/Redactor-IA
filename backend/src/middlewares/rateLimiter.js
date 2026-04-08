@@ -1,12 +1,20 @@
 /**
- * Dual-counter rate limiter (in-memory, per IP).
- *
- * Rules:
- *   - Window:  max 8 attempts per 15-minute sliding window
- *   - Daily:   max 40 attempts per calendar day (midnight Europe/Madrid)
- *
- * Sets req.rateLimitState so the controller can embed limit info in the response.
- * On block, responds directly with 429 + limit state.
+ * Middleware de rate limiting dual (ventana deslizante + límite diario)
+ * 
+ * Implementa dos límites independientes por IP:
+ * - Ventana: máximo 8 intentos en ventana deslizante de 15 minutos
+ * - Diario: máximo 40 intentos por día calendario (medianoche Europe/Madrid)
+ * 
+ * Almacenamiento en memoria (Map), se pierde al reiniciar el servidor.
+ * 
+ * Funcionamiento:
+ * - Al recibir request, obtiene/crea registro para la IP
+ * - Resetea contadores si han expirado (ventana o día)
+ * - Verifica límites antes de incrementar
+ * - Si está bloqueado, responde 429 con estado de límites
+ * - Si ok, incrementa contadores y adjunta req.rateLimitState para el controller
+ * 
+ * @module middlewares/rateLimiter
  */
 
 const WINDOW_LIMIT = 8;
@@ -14,15 +22,21 @@ const WINDOW_MS    = 15 * 60 * 1000; // 15 min
 const DAILY_LIMIT  = 40;
 const TZ           = 'Europe/Madrid';
 
-// Map<ip, { windowCount, windowResetAt, dailyCount, dailyDate }>
+// Almacén in-memory: Map<ip, { windowCount, windowResetAt, dailyCount, dailyDate }>
 const store = new Map();
 
-/** Returns the current date string "YYYY-MM-DD" in Europe/Madrid timezone. */
+/**
+ * Retorna la fecha actual "YYYY-MM-DD" en zona horaria Europe/Madrid
+ * @returns {string} Fecha en formato ISO (YYYY-MM-DD)
+ */
 function todayInMadrid() {
   return new Intl.DateTimeFormat('sv-SE', { timeZone: TZ }).format(new Date());
 }
 
-/** Returns the timestamp (ms) of the next midnight in Europe/Madrid. */
+/**
+ * Calcula el timestamp (ms) de la próxima medianoche en Europe/Madrid
+ * @returns {number} Timestamp en milisegundos
+ */
 function nextMidnightMadrid() {
   const now = new Date();
   // Build today's date in Madrid, then advance one day
@@ -51,6 +65,13 @@ function nextMidnightMadrid() {
   return tomorrowMidnightLocal.getTime() + utcOffset;
 }
 
+/**
+ * Obtiene o crea el registro de límites para una IP.
+ * Resetea contadores si han expirado (ventana o día).
+ * 
+ * @param {string} ip - Dirección IP del cliente
+ * @returns {Object} Registro de límites { windowCount, windowResetAt, dailyCount, dailyDate }
+ */
 function getRecord(ip) {
   const now   = Date.now();
   const today = todayInMadrid();
@@ -81,6 +102,12 @@ function getRecord(ip) {
   return rec;
 }
 
+/**
+ * Construye el objeto de estado de límites para responder al cliente.
+ * 
+ * @param {Object} rec - Registro de límites de la IP
+ * @returns {Object} Estado de límites { remainingWindow, remainingDaily, windowResetAt, dailyResetAt, blockedBy }
+ */
 function buildState(rec) {
   return {
     remainingWindow: Math.max(0, WINDOW_LIMIT - rec.windowCount),
@@ -91,6 +118,15 @@ function buildState(rec) {
   };
 }
 
+/**
+ * Middleware principal de rate limiting.
+ * Valida límites, consume un intento si ok, o bloquea con 429 si excedido.
+ * Adjunta req.rateLimitState para que el controller lo incluya en la respuesta.
+ * 
+ * @param {Object} req - Express request
+ * @param {Object} res - Express response
+ * @param {Function} next - Express next middleware
+ */
 function rateLimiter(req, res, next) {
   const ip  = req.ip || req.socket?.remoteAddress || 'unknown';
   const rec = getRecord(ip);
@@ -115,6 +151,14 @@ function rateLimiter(req, res, next) {
   next();
 }
 
+/**
+ * Endpoint GET /api/limits para obtener el estado de límites sin consumir intentos.
+ * Útil para que el frontend sincronice el estado al cargar la app.
+ * 
+ * @param {Object} req - Express request
+ * @param {Object} res - Express response
+ * @returns {Object} JSON con estado de límites
+ */
 function getLimitStatus(req, res) {
   const ip  = req.ip || req.socket?.remoteAddress || 'unknown';
   const rec = getRecord(ip);
