@@ -1,6 +1,34 @@
-const MAX_CHARS = 500;
+import { MAX_CHARS } from '../constants';
 
+/**
+ * Tarjeta de entrada de texto con validación de caracteres y controles.
+ * Incluye textarea, contador de caracteres con barra de progreso, estado de bloqueo, y botones de limpiar/generar.
+ * 
+ * @param {Object} props - Props del componente
+ * @param {string} [props.inputText=''] - Texto actual del usuario
+ * @param {Function} props.onInputChange - Callback cuando cambia el texto: (newText: string) => void
+ * @param {Function} props.onClear - Callback para limpiar el texto
+ * @param {Function} props.onGenerate - Callback para generar texto con IA
+ * @param {boolean} [props.isLoading=false] - Si está generando texto
+ * @param {boolean} [props.isBlocked=false] - Si el usuario está bloqueado por límites
+ * @param {string} [props.errorMessage=''] - Mensaje de error a mostrar
+ * @param {Object} [props.theme={}] - Objeto de tema (lightTheme o darkTheme)
+ * 
+ * @returns {JSX.Element} TextInputCard component
+ * 
+ * @example
+ * <TextInputCard
+ *   inputText={text}
+ *   onInputChange={setText}
+ *   onClear={() => setText('')}
+ *   onGenerate={handleGenerate}
+ *   isLoading={loading}
+ *   isBlocked={limits.blockedBy !== null}
+ *   theme={currentTheme}
+ * />
+ */
 export default function TextInputCard({ inputText = '', onInputChange, onClear, onGenerate, isLoading = false, isBlocked = false, errorMessage = '', theme = {} }) {
+  // Cálculos de progreso y validación
   const charCount = inputText.length;
   const pct = Math.min((charCount / MAX_CHARS) * 100, 100);
   const canGenerate = !isLoading && !isBlocked && charCount > 0;
@@ -12,7 +40,8 @@ export default function TextInputCard({ inputText = '', onInputChange, onClear, 
       display: 'flex', flexDirection: 'column', gap: '16px',
       transition: 'background 0.2s, border-color 0.2s',
     }}>
-      {/* Header */}
+      
+      {/* ========== HEADER: TÍTULO + BADGE DE ESTADO ========== */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div>
           <h2 style={{ fontSize: '17px', fontWeight: '600', color: theme.textPrimary, margin: 0, transition: 'color 0.2s' }}>Escribe tu texto</h2>
@@ -41,7 +70,7 @@ export default function TextInputCard({ inputText = '', onInputChange, onClear, 
         )}
       </div>
 
-      {/* Textarea */}
+      {/* ========== TEXTAREA ========== */}
       <textarea
         value={inputText}
         onChange={e => onInputChange && onInputChange(e.target.value)}
@@ -58,7 +87,7 @@ export default function TextInputCard({ inputText = '', onInputChange, onClear, 
         }}
       />
 
-      {/* Counter */}
+      {/* ========== CONTADOR DE CARACTERES Y BARRA DE PROGRESO ========== */}
       <div>
         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: theme.textMuted, marginBottom: '6px', transition: 'color 0.2s' }}>
           <span>Caracteres usados</span>
@@ -69,14 +98,14 @@ export default function TextInputCard({ inputText = '', onInputChange, onClear, 
         </div>
       </div>
 
-      {/* Error message */}
+      {/* ========== MENSAJE DE ERROR ========== */}
       {errorMessage && (
         <div style={{ borderRadius: '10px', border: `1px solid ${theme.errorBorder}`, background: theme.errorBg, padding: '10px 14px', transition: 'all 0.2s' }}>
           <p style={{ fontSize: '13px', color: theme.errorText, margin: 0 }}>{errorMessage}</p>
         </div>
       )}
 
-      {/* Buttons */}
+      {/* ========== BOTONES: LIMPIAR + GENERAR ========== */}
       <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
         <button
           onClick={onClear}
