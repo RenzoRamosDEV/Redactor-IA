@@ -11,7 +11,7 @@
  * Variables de entorno requeridas:
  * - GROQ_API_KEY: Clave de API de Groq
  * - PORT: Puerto del servidor (default: 3001)
- * - ALLOWED_ORIGINS (opcional): lista separada por coma de orígenes permitidos
+ * - FRONTEND_URL (opcional): URL adicional permitida por CORS
  * 
  * @module server
  */
@@ -25,11 +25,6 @@ const rewriteRoutes = require('./routes/rewrite.routes');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
-const rawAllowedOrigins = process.env.ALLOWED_ORIGINS || process.env.FRONTEND_URL || '';
-const configuredOrigins = rawAllowedOrigins
-  .split(',')
-  .map((origin) => origin.trim())
-  .filter(Boolean);
 
 // ──────────────────────────────────────────────────────────────
 // Middlewares de seguridad
@@ -42,8 +37,9 @@ app.use(cors({
     if (!origin || /^http:\/\/localhost:\d+$/.test(origin)) {
       return callback(null, true);
     }
-    // Permitir orígenes configurados explícitamente para producción
-    if (configuredOrigins.includes(origin)) return callback(null, true);
+    // Permitir FRONTEND_URL explícito si está configurado
+    const allowed = process.env.FRONTEND_URL;
+    if (allowed && origin === allowed) return callback(null, true);
     callback(new Error(`CORS blocked: ${origin}`));
   },
   methods: ['GET', 'POST'],
