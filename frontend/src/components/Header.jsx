@@ -21,7 +21,12 @@ export default function Header({ limits, windowLimit = 8, dailyLimit = 40, darkM
     background: theme.cardBg,
     boxShadow: theme.shadowSm,
     textAlign: 'center', minWidth: '130px',
+    minHeight: '68px',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
     transition: 'background 0.2s, border-color 0.2s',
+    cursor: 'help',
   };
 
   return (
@@ -40,11 +45,14 @@ export default function Header({ limits, windowLimit = 8, dailyLimit = 40, darkM
         {/* Right side: counters + dark toggle */}
         <div style={{ display: 'flex', gap: '12px', flexShrink: 0, marginTop: '4px', alignItems: 'flex-start' }}>
           {/* Window counter */}
-          <div style={{
-            ...cardBase,
-            border: `1px solid ${isWindowBlocked ? theme.errorBorder : theme.border}`,
-            background: isWindowBlocked ? theme.errorBg : theme.cardBg,
-          }}>
+          <div
+            style={{
+              ...cardBase,
+              border: `1px solid ${isWindowBlocked ? theme.errorBorder : theme.border}`,
+              background: isWindowBlocked ? theme.errorBg : theme.cardBg,
+            }}
+            title={remainingWindow < windowLimit && windowCountdown ? `Se reinicia en ${windowCountdown}` : 'Límite de intentos cada 15 minutos'}
+          >
             <p style={{ fontSize: '11px', color: theme.textMuted, marginBottom: '4px', transition: 'color 0.2s' }}>Tramo 15 min</p>
             <p style={{
               fontSize: '24px', fontWeight: '700', lineHeight: 1,
@@ -53,24 +61,17 @@ export default function Header({ limits, windowLimit = 8, dailyLimit = 40, darkM
             }}>
               {remainingWindow}/{windowLimit}
             </p>
-            {/* Live countdown — shows only when window reset time is known */}
-            {windowResetAt && windowCountdown && (
-              <p style={{
-                fontSize: '11px', fontWeight: '600', marginTop: '5px', letterSpacing: '0.04em',
-                color: isWindowBlocked ? theme.errorText : theme.textMuted,
-                transition: 'color 0.2s',
-              }}>
-                {windowCountdown}
-              </p>
-            )}
           </div>
 
           {/* Daily counter */}
-          <div style={{
-            ...cardBase,
-            border: `1px solid ${isDailyBlocked ? theme.errorBorder : theme.border}`,
-            background: isDailyBlocked ? theme.errorBg : theme.cardBg,
-          }}>
+          <div
+            style={{
+              ...cardBase,
+              border: `1px solid ${isDailyBlocked ? theme.errorBorder : theme.border}`,
+              background: isDailyBlocked ? theme.errorBg : theme.cardBg,
+            }}
+            title={isDailyBlocked && dailyCountdown ? `Se reinicia en ${dailyCountdown}` : 'Límite de intentos por día (medianoche España)'}
+          >
             <p style={{ fontSize: '11px', color: theme.textMuted, marginBottom: '4px', transition: 'color 0.2s' }}>Hoy (diario)</p>
             <p style={{
               fontSize: '24px', fontWeight: '700', lineHeight: 1,
@@ -79,11 +80,6 @@ export default function Header({ limits, windowLimit = 8, dailyLimit = 40, darkM
             }}>
               {remainingDaily}/{dailyLimit}
             </p>
-            {isDailyBlocked && dailyCountdown && (
-              <p style={{ fontSize: '11px', fontWeight: '600', color: theme.errorText, marginTop: '5px', transition: 'color 0.2s' }}>
-                {dailyCountdown}
-              </p>
-            )}
           </div>
 
           {/* Dark mode toggle */}
