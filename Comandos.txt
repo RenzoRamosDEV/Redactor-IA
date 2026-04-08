@@ -1,3 +1,7 @@
+#GROQ Api Key
+
+https://console.groq.com/keys
+
 # Redactor IA - Comandos
 
 ## Levantar backend y frontend
