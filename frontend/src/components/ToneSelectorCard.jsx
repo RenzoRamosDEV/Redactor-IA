@@ -1,5 +1,5 @@
 const TONES = [
-  { id: 'rewrite', label: 'Mejorar redacción' },
+  { id: 'rewrite', label: 'Mejor redacción' },
   { id: 'formal',  label: 'Más formal' },
   { id: 'fun',     label: 'Más divertido' },
   { id: 'casual',  label: 'Más casual' },
