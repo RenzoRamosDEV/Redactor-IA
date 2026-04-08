@@ -1,19 +1,40 @@
-const TONES = [
-  { id: 'rewrite', label: 'Mejor redacción' },
-  { id: 'formal',  label: 'Más formal' },
-  { id: 'fun',     label: 'Más divertido' },
-  { id: 'casual',  label: 'Más casual' },
-  { id: 'professional', label: 'Más profesional' },
-  { id: 'direct',  label: 'Más directo' },
-  { id: 'persuasive', label: 'Más persuasivo' },
-  { id: 'creative', label: 'Más creativo' },
-];
+import { TONES, DEFAULT_TONE, DEFAULT_INTENSITY, DEFAULT_KEEP_LENGTH, DEFAULT_EXTRA_INSTRUCTION } from '../constants';
 
+/**
+ * Tarjeta de selección de tono y configuración de estilo.
+ * Incluye grid de tonos, slider de intensidad, toggle de mantener longitud, y textarea para instrucción extra.
+ * 
+ * @param {Object} props - Props del componente
+ * @param {string} [props.selectedTone='rewrite'] - ID del tono seleccionado
+ * @param {Function} props.onToneChange - Callback cuando cambia el tono: (toneId: string) => void
+ * @param {number} [props.intensity=60] - Nivel de intensidad del tono (0-100)
+ * @param {Function} props.onIntensityChange - Callback cuando cambia intensidad: (value: number) => void
+ * @param {boolean} [props.keepLength=true] - Si se debe mantener longitud similar al original
+ * @param {Function} props.onKeepLengthChange - Callback cuando cambia keepLength: (value: boolean) => void
+ * @param {string} [props.extraInstruction=''] - Instrucción adicional para la IA (max 200 chars)
+ * @param {Function} props.onExtraInstructionChange - Callback cuando cambia instrucción: (text: string) => void
+ * @param {Object} [props.theme={}] - Objeto de tema (lightTheme o darkTheme)
+ * 
+ * @returns {JSX.Element} ToneSelectorCard component
+ * 
+ * @example
+ * <ToneSelectorCard
+ *   selectedTone={tone}
+ *   onToneChange={setTone}
+ *   intensity={intensity}
+ *   onIntensityChange={setIntensity}
+ *   keepLength={keepLength}
+ *   onKeepLengthChange={setKeepLength}
+ *   extraInstruction={extra}
+ *   onExtraInstructionChange={setExtra}
+ *   theme={currentTheme}
+ * />
+ */
 export default function ToneSelectorCard({
-  selectedTone = 'rewrite', onToneChange,
-  intensity = 60, onIntensityChange,
-  keepLength = true, onKeepLengthChange,
-  extraInstruction = '', onExtraInstructionChange,
+  selectedTone = DEFAULT_TONE, onToneChange,
+  intensity = DEFAULT_INTENSITY, onIntensityChange,
+  keepLength = DEFAULT_KEEP_LENGTH, onKeepLengthChange,
+  extraInstruction = DEFAULT_EXTRA_INSTRUCTION, onExtraInstructionChange,
   theme = {},
 }) {
   return (
@@ -23,13 +44,14 @@ export default function ToneSelectorCard({
       display: 'flex', flexDirection: 'column', gap: '20px',
       transition: 'background 0.2s, border-color 0.2s',
     }}>
-      {/* Header */}
+      
+      {/* ========== HEADER ========== */}
       <div>
         <h2 style={{ fontSize: '17px', fontWeight: '600', color: theme.textPrimary, margin: 0, transition: 'color 0.2s' }}>Configuración del estilo</h2>
         <p style={{ fontSize: '12px', color: theme.textMuted, marginTop: '2px', transition: 'color 0.2s' }}>Elige cómo quieres que se vea el texto generado.</p>
       </div>
 
-      {/* Tone grid */}
+      {/* ========== GRID DE TONOS ========== */}
       <div>
         <p style={{ fontSize: '13px', fontWeight: '500', color: theme.textSecondary, marginBottom: '10px', transition: 'color 0.2s' }}>Tono principal</p>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
@@ -56,7 +78,7 @@ export default function ToneSelectorCard({
         </div>
       </div>
 
-      {/* Intensity slider */}
+      {/* ========== SLIDER DE INTENSIDAD ========== */}
       <div>
         <p style={{ fontSize: '13px', fontWeight: '500', color: theme.textSecondary, marginBottom: '10px', transition: 'color 0.2s' }}>Nivel de intensidad</p>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -70,7 +92,7 @@ export default function ToneSelectorCard({
         </div>
       </div>
 
-      {/* Keep length */}
+      {/* ========== TOGGLE MANTENER LONGITUD ========== */}
       <div style={{
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         border: `1px dashed ${theme.border}`, borderRadius: '12px', padding: '14px 16px',
@@ -100,7 +122,7 @@ export default function ToneSelectorCard({
         </button>
       </div>
 
-      {/* Extra instruction */}
+      {/* ========== INSTRUCCIÓN EXTRA ========== */}
       <div style={{ border: `1px dashed ${theme.border}`, borderRadius: '12px', padding: '14px 16px', transition: 'border-color 0.2s' }}>
         <p style={{ fontSize: '13px', fontWeight: '500', color: theme.textSecondary, marginBottom: '8px', transition: 'color 0.2s' }}>Instrucción extra</p>
         <textarea
