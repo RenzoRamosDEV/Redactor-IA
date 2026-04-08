@@ -115,4 +115,19 @@ function rateLimiter(req, res, next) {
   next();
 }
 
-module.exports = { rateLimiter };
+function getLimitStatus(req, res) {
+  const ip  = req.ip || req.socket?.remoteAddress || 'unknown';
+  const rec = getRecord(ip);
+  const state = buildState(rec);
+  
+  // Check if blocked
+  if (rec.dailyCount >= DAILY_LIMIT) {
+    state.blockedBy = 'daily';
+  } else if (rec.windowCount >= WINDOW_LIMIT) {
+    state.blockedBy = 'window';
+  }
+  
+  return res.json({ limits: state });
+}
+
+module.exports = { rateLimiter, getLimitStatus };
