@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { MAX_CHARS } from '../constants';
 
 /**
@@ -28,11 +29,27 @@ import { MAX_CHARS } from '../constants';
  * />
  */
 export default function TextInputCard({ inputText = '', onInputChange, onClear, onGenerate, isLoading = false, isBlocked = false, errorMessage = '', theme = {} }) {
+  // Hook de traducción
+  const { t } = useTranslation();
+  
   // Cálculos de progreso y validación
   const charCount = inputText.length;
   const pct = Math.min((charCount / MAX_CHARS) * 100, 100);
   const exceedsLimit = charCount > MAX_CHARS;
   const canGenerate = !isLoading && !isBlocked && charCount > 0 && !exceedsLimit;
+
+  /**
+   * Determina el color de la barra de progreso según el porcentaje de caracteres usados.
+   * @param {number} percentage - Porcentaje de caracteres usados (0-100+)
+   * @param {boolean} exceeds - Si excede el límite
+   * @returns {string} Color hex
+   */
+  const getProgressColor = (percentage, exceeds) => {
+    if (exceeds) return '#ffcccb'; // Rojo suave (>100%)
+    if (percentage >= 80) return '#fffacd'; // Amarillo suave (80-100%)
+    if (percentage >= 60) return '#87ceeb'; // Azul suave (60-80%)
+    return '#98fb98'; // Verde suave (0-60%)
+  };
 
   return (
     <div style={{
@@ -45,8 +62,8 @@ export default function TextInputCard({ inputText = '', onInputChange, onClear, 
       {/* ========== HEADER: TÍTULO + BADGE DE ESTADO ========== */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div>
-          <h2 style={{ fontSize: '17px', fontWeight: '600', color: theme.textPrimary, margin: 0, transition: 'color 0.2s' }}>Escribe tu texto</h2>
-          <p style={{ fontSize: '12px', color: theme.textMuted, marginTop: '2px', transition: 'color 0.2s' }}>Máximo {MAX_CHARS} caracteres por intento.</p>
+          <h2 style={{ fontSize: '17px', fontWeight: '600', color: theme.textPrimary, margin: 0, transition: 'color 0.2s' }}>{t('textInput.title')}</h2>
+          <p style={{ fontSize: '12px', color: theme.textMuted, marginTop: '2px', transition: 'color 0.2s' }}>{t('textInput.subtitle', { maxChars: MAX_CHARS })}</p>
         </div>
         {isBlocked ? (
           <span style={{
@@ -56,7 +73,7 @@ export default function TextInputCard({ inputText = '', onInputChange, onClear, 
             borderRadius: '999px', padding: '4px 12px', transition: 'all 0.2s',
           }}>
             <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: theme.errorText, display: 'inline-block' }} />
-            Bloqueado temporalmente
+            {t('textInput.statusBlocked')}
           </span>
         ) : (
           <span style={{
@@ -66,7 +83,7 @@ export default function TextInputCard({ inputText = '', onInputChange, onClear, 
             borderRadius: '999px', padding: '4px 12px', transition: 'all 0.2s',
           }}>
             <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: theme.successText, display: 'inline-block' }} />
-            Listo para redactar
+            {t('textInput.statusReady')}
           </span>
         )}
       </div>
@@ -76,7 +93,7 @@ export default function TextInputCard({ inputText = '', onInputChange, onClear, 
         value={inputText}
         onChange={e => onInputChange && onInputChange(e.target.value)}
         rows={6}
-        placeholder="Escribe o pega tu texto aquí..."
+        placeholder={t('textInput.placeholder')}
         disabled={isBlocked}
         style={{
           width: '100%', resize: 'none', borderRadius: '12px',
@@ -91,15 +108,15 @@ export default function TextInputCard({ inputText = '', onInputChange, onClear, 
       {/* ========== CONTADOR DE CARACTERES Y BARRA DE PROGRESO ========== */}
       <div>
         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: exceedsLimit ? theme.errorText : theme.textMuted, marginBottom: '6px', transition: 'color 0.2s' }}>
-          <span>{exceedsLimit ? 'Límite excedido' : 'Caracteres usados'}</span>
+          <span>{exceedsLimit ? t('textInput.limitExceeded') : t('textInput.charsUsed')}</span>
           <span style={{ fontWeight: exceedsLimit ? '600' : '400' }}>{charCount}/{MAX_CHARS}</span>
         </div>
         <div style={{ width: '100%', background: theme.border, borderRadius: '999px', height: '5px' }}>
-          <div style={{ width: `${Math.min(pct, 100)}%`, background: exceedsLimit ? '#ef4444' : theme.accentBg, borderRadius: '999px', height: '5px', transition: 'width 0.2s, background 0.2s' }} />
+          <div style={{ width: `${Math.min(pct, 100)}%`, background: getProgressColor(pct, exceedsLimit), borderRadius: '999px', height: '5px', transition: 'width 0.2s, background 0.2s' }} />
         </div>
         {exceedsLimit && (
           <p style={{ fontSize: '11px', color: theme.errorText, marginTop: '6px', marginBottom: 0 }}>
-            Reduce el texto en {charCount - MAX_CHARS} caracteres para poder generar.
+            {t('textInput.reduceText', { count: charCount - MAX_CHARS })}
           </p>
         )}
       </div>
@@ -121,7 +138,7 @@ export default function TextInputCard({ inputText = '', onInputChange, onClear, 
             cursor: 'pointer', fontFamily: 'inherit', transition: 'background 0.2s, color 0.2s',
           }}
         >
-          Limpiar
+          {t('textInput.clearButton')}
         </button>
         <button
           onClick={onGenerate}
@@ -134,7 +151,7 @@ export default function TextInputCard({ inputText = '', onInputChange, onClear, 
             transition: 'background 0.2s',
           }}
         >
-          {isLoading ? 'Generando...' : isBlocked ? 'En espera' : exceedsLimit ? 'Texto muy largo' : 'Generar texto'}
+          {isLoading ? t('textInput.generatingButton') : isBlocked ? t('textInput.waitingButton') : exceedsLimit ? t('textInput.tooLongButton') : t('textInput.generateButton')}
         </button>
       </div>
     </div>

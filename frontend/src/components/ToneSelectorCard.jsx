@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { TONES, DEFAULT_TONE, DEFAULT_INTENSITY, DEFAULT_KEEP_LENGTH, DEFAULT_EXTRA_INSTRUCTION } from '../constants';
 
 /**
@@ -37,6 +38,9 @@ export default function ToneSelectorCard({
   extraInstruction = DEFAULT_EXTRA_INSTRUCTION, onExtraInstructionChange,
   theme = {},
 }) {
+  // Hook de traducción
+  const { t } = useTranslation();
+  
   return (
     <div style={{
       background: theme.cardBg, borderRadius: '16px', border: `1px solid ${theme.border}`,
@@ -47,13 +51,13 @@ export default function ToneSelectorCard({
       
       {/* ========== HEADER ========== */}
       <div>
-        <h2 style={{ fontSize: '17px', fontWeight: '600', color: theme.textPrimary, margin: 0, transition: 'color 0.2s' }}>Configuración del estilo</h2>
-        <p style={{ fontSize: '12px', color: theme.textMuted, marginTop: '2px', transition: 'color 0.2s' }}>Elige cómo quieres que se vea el texto generado.</p>
+        <h2 style={{ fontSize: '17px', fontWeight: '600', color: theme.textPrimary, margin: 0, transition: 'color 0.2s' }}>{t('toneSelector.title')}</h2>
+        <p style={{ fontSize: '12px', color: theme.textMuted, marginTop: '2px', transition: 'color 0.2s' }}>{t('toneSelector.subtitle')}</p>
       </div>
 
       {/* ========== GRID DE TONOS ========== */}
       <div>
-        <p style={{ fontSize: '13px', fontWeight: '500', color: theme.textSecondary, marginBottom: '10px', transition: 'color 0.2s' }}>Tono principal</p>
+        <p style={{ fontSize: '13px', fontWeight: '500', color: theme.textSecondary, marginBottom: '10px', transition: 'color 0.2s' }}>{t('toneSelector.mainTone')}</p>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
           {TONES.map(tone => {
             const active = selectedTone === tone.id;
@@ -71,7 +75,7 @@ export default function ToneSelectorCard({
                   transition: 'all 0.15s', fontFamily: 'inherit',
                 }}
               >
-                {tone.label}
+                {t(`tones.${tone.id}`)}
               </button>
             );
           })}
@@ -80,15 +84,15 @@ export default function ToneSelectorCard({
 
       {/* ========== SLIDER DE INTENSIDAD ========== */}
       <div>
-        <p style={{ fontSize: '13px', fontWeight: '500', color: theme.textSecondary, marginBottom: '10px', transition: 'color 0.2s' }}>Nivel de intensidad</p>
+        <p style={{ fontSize: '13px', fontWeight: '500', color: theme.textSecondary, marginBottom: '10px', transition: 'color 0.2s' }}>{t('toneSelector.intensityLevel')}</p>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <span style={{ fontSize: '12px', color: theme.textMuted, flexShrink: 0, transition: 'color 0.2s' }}>Suave</span>
+          <span style={{ fontSize: '12px', color: theme.textMuted, flexShrink: 0, transition: 'color 0.2s' }}>{t('toneSelector.intensitySoft')}</span>
           <input
             type="range" min={0} max={100} value={intensity}
             onChange={e => onIntensityChange && onIntensityChange(Number(e.target.value))}
             style={{ flex: 1 }}
           />
-          <span style={{ fontSize: '12px', color: theme.textMuted, flexShrink: 0, transition: 'color 0.2s' }}>Alto</span>
+          <span style={{ fontSize: '12px', color: theme.textMuted, flexShrink: 0, transition: 'color 0.2s' }}>{t('toneSelector.intensityHigh')}</span>
         </div>
       </div>
 
@@ -99,8 +103,8 @@ export default function ToneSelectorCard({
         transition: 'border-color 0.2s',
       }}>
         <div>
-          <p style={{ fontSize: '13px', fontWeight: '500', color: theme.textSecondary, margin: 0, transition: 'color 0.2s' }}>Mantener longitud</p>
-          <p style={{ fontSize: '12px', color: theme.textMuted, marginTop: '2px', transition: 'color 0.2s' }}>Evita que el texto crezca demasiado</p>
+          <p style={{ fontSize: '13px', fontWeight: '500', color: theme.textSecondary, margin: 0, transition: 'color 0.2s' }}>{t('toneSelector.keepLengthTitle')}</p>
+          <p style={{ fontSize: '12px', color: theme.textMuted, marginTop: '2px', transition: 'color 0.2s' }}>{t('toneSelector.keepLengthDesc')}</p>
         </div>
         <button
           onClick={() => onKeepLengthChange && onKeepLengthChange(!keepLength)}
@@ -124,12 +128,12 @@ export default function ToneSelectorCard({
 
       {/* ========== INSTRUCCIÓN EXTRA ========== */}
       <div style={{ border: `1px dashed ${theme.border}`, borderRadius: '12px', padding: '14px 16px', transition: 'border-color 0.2s' }}>
-        <p style={{ fontSize: '13px', fontWeight: '500', color: theme.textSecondary, marginBottom: '8px', transition: 'color 0.2s' }}>Instrucción extra</p>
+        <p style={{ fontSize: '13px', fontWeight: '500', color: theme.textSecondary, marginBottom: '8px', transition: 'color 0.2s' }}>{t('toneSelector.extraInstructionTitle')}</p>
         <textarea
           value={extraInstruction}
           onChange={e => onExtraInstructionChange && onExtraInstructionChange(e.target.value)}
           rows={2} maxLength={200}
-          placeholder="Ej.: Haz que suene más cercano y convincente, pero manteniendo un tono profesional."
+          placeholder={t('toneSelector.extraInstructionPlaceholder')}
           style={{
             width: '100%', resize: 'none', border: 'none', background: 'transparent',
             fontSize: '13px', color: theme.textSecondary, lineHeight: '1.5',

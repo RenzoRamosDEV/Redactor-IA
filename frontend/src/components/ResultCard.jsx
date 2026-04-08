@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useCountdown } from '../hooks/useCountdown';
 import { TONE_LABELS, WINDOW_LIMIT, DAILY_LIMIT } from '../constants';
 
@@ -36,6 +37,9 @@ export default function ResultCard({
   generatedText = '', isLoading = false, selectedTone = 'rewrite',
   processingTime = null, limits, windowLimit = WINDOW_LIMIT, dailyLimit = DAILY_LIMIT, theme = {},
 }) {
+  // Hook de traducción
+  const { t } = useTranslation();
+  
   // Estado local para botón de copiar
   const [copied, setCopied] = useState(false);
 
@@ -87,8 +91,8 @@ export default function ResultCard({
       {/* ========== HEADER: TÍTULO + BADGE + BOTÓN COPIAR ========== */}
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '20px' }}>
         <div>
-          <h2 style={{ fontSize: '17px', fontWeight: '600', color: theme.textPrimary, margin: 0, transition: 'color 0.2s' }}>Resultado generado</h2>
-          <p style={{ fontSize: '12px', color: theme.textMuted, marginTop: '2px', transition: 'color 0.2s' }}>Vista previa del texto mejorado por la IA.</p>
+          <h2 style={{ fontSize: '17px', fontWeight: '600', color: theme.textPrimary, margin: 0, transition: 'color 0.2s' }}>{t('result.title')}</h2>
+          <p style={{ fontSize: '12px', color: theme.textMuted, marginTop: '2px', transition: 'color 0.2s' }}>{t('result.subtitle')}</p>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           {isLoading && (
@@ -99,7 +103,7 @@ export default function ResultCard({
               borderRadius: '999px', padding: '4px 12px', transition: 'all 0.2s',
             }}>
               <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: theme.warnText, display: 'inline-block', animation: 'pulse 1s infinite' }} />
-              Generando respuesta...
+              {t('result.generatingStatus')}
             </span>
           )}
           <button
@@ -119,7 +123,7 @@ export default function ResultCard({
               <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
               <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
             </svg>
-            {copied ? 'Copiado' : 'Copiar texto'}
+            {copied ? t('result.copiedButton') : t('result.copyButton')}
           </button>
         </div>
       </div>
@@ -143,7 +147,7 @@ export default function ResultCard({
             <p style={{ fontSize: '14px', color: theme.textSecondary, lineHeight: '1.7', margin: 0, whiteSpace: 'pre-wrap', transition: 'color 0.2s' }}>{generatedText}</p>
           ) : (
             <p style={{ fontSize: '13px', color: theme.textPlaceholder, fontStyle: 'italic', margin: 0, transition: 'color 0.2s' }}>
-              El texto generado aparecerá aquí...
+              {t('result.placeholder')}
             </p>
           )}
         </div>
@@ -155,37 +159,37 @@ export default function ResultCard({
             transition: 'border-color 0.2s',
           }}>
             <p style={{ fontSize: '10px', fontWeight: '700', color: theme.textMuted, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '12px', transition: 'color 0.2s' }}>
-              ESTADO DEL SISTEMA
+              {t('result.systemStatus')}
             </p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <Row label="Motor de redacción" theme={theme}>
+              <Row label={t('result.engineLabel')} theme={theme}>
                 <span style={{ fontSize: '13px', fontWeight: '600', color: isBlocked ? theme.errorText : theme.successText, transition: 'color 0.2s' }}>
-                  {isBlocked ? 'Bloqueado' : 'Activo'}
+                  {isBlocked ? t('result.engineBlocked') : t('result.engineActive')}
                 </span>
               </Row>
-              <Row label="Tono seleccionado" theme={theme}>
+              <Row label={t('result.toneLabel')} theme={theme}>
                 <span style={{ fontSize: '13px', fontWeight: '600', color: theme.textPrimary, transition: 'color 0.2s' }}>
-                  {TONE_LABELS[selectedTone] || selectedTone}
+                  {t(`toneLabels.${selectedTone}`) || TONE_LABELS[selectedTone] || selectedTone}
                 </span>
               </Row>
               {processingTime && (
-                <Row label="Tiempo de respuesta" theme={theme}>
+                <Row label={t('result.responseTimeLabel')} theme={theme}>
                   <span style={{ fontSize: '13px', fontWeight: '600', color: theme.textPrimary, transition: 'color 0.2s' }}>{processingTime} s</span>
                 </Row>
               )}
-              <Row label="Tramo 15 min" theme={theme}>
+              <Row label={t('result.windowLabel')} theme={theme}>
                 <span style={{ fontSize: '13px', fontWeight: '600', color: remainingWindow === 0 ? theme.errorText : theme.textPrimary, transition: 'color 0.2s' }}>
                   {windowUsed}/{windowLimit}
                 </span>
               </Row>
               {windowUsed > 0 && windowCountdown && (
-                <Row label="Reinicio en" theme={theme}>
+                <Row label={t('result.resetInLabel')} theme={theme}>
                   <span style={{ fontSize: '13px', fontWeight: '600', color: theme.textPrimary, transition: 'color 0.2s', fontVariantNumeric: 'tabular-nums' }}>
                     {windowCountdown}
                   </span>
                 </Row>
               )}
-              <Row label="Hoy (diario)" theme={theme}>
+              <Row label={t('result.dailyLabel')} theme={theme}>
                 <span style={{ fontSize: '13px', fontWeight: '600', color: remainingDaily === 0 ? theme.errorText : theme.textPrimary, transition: 'color 0.2s' }}>
                   {dailyUsed}/{dailyLimit}
                 </span>
@@ -194,7 +198,7 @@ export default function ResultCard({
 
             {/* Barra de progreso ventana 15 min */}
             <div style={{ marginTop: '12px' }}>
-              <p style={{ fontSize: '10px', color: theme.textMuted, marginBottom: '4px', transition: 'color 0.2s' }}>15 min</p>
+              <p style={{ fontSize: '10px', color: theme.textMuted, marginBottom: '4px', transition: 'color 0.2s' }}>{t('result.windowProgress')}</p>
               <div style={{ background: theme.border, borderRadius: '999px', height: '4px' }}>
                 <div style={{ width: `${windowUsedPct}%`, height: '4px', borderRadius: '999px', background: barColor(windowUsedPct), transition: 'width 0.4s' }} />
               </div>
@@ -202,7 +206,7 @@ export default function ResultCard({
 
             {/* Barra de progreso diaria */}
             <div style={{ marginTop: '8px' }}>
-              <p style={{ fontSize: '10px', color: theme.textMuted, marginBottom: '4px', transition: 'color 0.2s' }}>Diario</p>
+              <p style={{ fontSize: '10px', color: theme.textMuted, marginBottom: '4px', transition: 'color 0.2s' }}>{t('result.dailyProgress')}</p>
               <div style={{ background: theme.border, borderRadius: '999px', height: '4px' }}>
                 <div style={{ width: `${dailyUsedPct}%`, height: '4px', borderRadius: '999px', background: barColor(dailyUsedPct), transition: 'width 0.4s' }} />
               </div>
@@ -216,12 +220,12 @@ export default function ResultCard({
               background: theme.errorBg, padding: '14px 16px', transition: 'all 0.2s',
             }}>
               <p style={{ fontSize: '13px', fontWeight: '600', color: theme.errorText, marginBottom: '6px', transition: 'color 0.2s' }}>
-                {blockedBy === 'daily' ? 'Límite diario alcanzado' : 'Límite de tramo alcanzado'}
+                {blockedBy === 'daily' ? t('result.dailyLimitReached') : t('result.windowLimitReached')}
               </p>
               <p style={{ fontSize: '12px', color: theme.errorText, lineHeight: '1.5', margin: 0, opacity: 0.85, transition: 'color 0.2s' }}>
                 {blockedBy === 'daily'
-                  ? `Has agotado los ${dailyLimit} intentos de hoy. Vuelve mañana a las 00:00 (hora de España).`
-                  : `Has usado los ${windowLimit} intentos del tramo.`}
+                  ? t('result.dailyLimitMessage', { limit: dailyLimit })
+                  : t('result.windowLimitMessage', { limit: windowLimit })}
               </p>
               {blockedBy === 'window' && windowCountdown && (
                 <p style={{ fontSize: '20px', fontWeight: '700', color: theme.errorText, marginTop: '8px', letterSpacing: '0.05em', transition: 'color 0.2s' }}>
