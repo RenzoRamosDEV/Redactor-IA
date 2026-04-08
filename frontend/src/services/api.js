@@ -8,10 +8,10 @@
 
 /**
  * URL base del API
- * Se obtiene de variable de entorno VITE_API_URL o usa mismo origen por defecto
+ * Se obtiene de variable de entorno VITE_API_URL o usa localhost por defecto
  * @private
  */
-const API_URL = import.meta.env.VITE_API_URL || '';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
 /**
  * @typedef {Object} LimitState
