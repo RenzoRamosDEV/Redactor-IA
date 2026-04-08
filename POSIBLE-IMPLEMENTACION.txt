@@ -1,0 +1,23 @@
+FUTURAS IMPLEMENTACIONES
+
+Login opcional (orientado a gamificación) ->
+Registro de usuario con los siguientes campos: nombre, nombre de usuario (sin uso de correo electrónico), contraseña encriptada y foto de perfil (mediante URL o subida de archivo local).
+
+Sistema de gamificación ->
+Cada texto redactado otorgará puntos que permitirán subir de nivel. Esta información se almacenará en base de datos, siendo obligatorio el registro para acceder a esta funcionalidad.
+Se incluirá un apartado visual con una barra de progreso hacia el siguiente nivel y estadísticas básicas (ejemplo: nivel actual, progreso restante, etc.)(Ejemplo: NIVEL-GAMIFICACION.png)
+
+Base de datos ->
+Implementación de persistencia mediante PostgreSQL o SQLite, según necesidades del proyecto.
+
+Internacionalización (i18n) ->
+Soporte multilenguaje, inicialmente en español e inglés.
+
+Reorganización del proyecto ->
+Estructuración clara y mantenible: separación de CSS, HTML y JavaScript en el frontend, y organización del backend siguiendo buenas prácticas para mejorar escalabilidad y legibilidad.
+
+Submenú informativo ->
+Incorporación de un submenú que incluya información sobre el desarrollador de la aplicación.
+
+Diseño responsive (mobile-first) ->
+Adaptación completa de la interfaz para dispositivos móviles, garantizando una visualización y usabilidad óptimas en cualquier tamaño de pantalla.
