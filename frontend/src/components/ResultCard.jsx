@@ -139,6 +139,13 @@ export default function ResultCard({
                   {windowUsed}/{windowLimit}
                 </span>
               </Row>
+              {windowUsed > 0 && windowCountdown && (
+                <Row label="Reinicio en" theme={theme}>
+                  <span style={{ fontSize: '13px', fontWeight: '600', color: theme.textPrimary, transition: 'color 0.2s', fontVariantNumeric: 'tabular-nums' }}>
+                    {windowCountdown}
+                  </span>
+                </Row>
+              )}
               <Row label="Hoy (diario)" theme={theme}>
                 <span style={{ fontSize: '13px', fontWeight: '600', color: remainingDaily === 0 ? theme.errorText : theme.textPrimary, transition: 'color 0.2s' }}>
                   {dailyUsed}/{dailyLimit}
