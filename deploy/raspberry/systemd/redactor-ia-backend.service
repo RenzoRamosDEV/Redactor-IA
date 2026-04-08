@@ -1,0 +1,23 @@
+[Unit]
+Description=Redactor IA Backend (Express)
+After=network.target
+
+[Service]
+Type=simple
+User=www-data
+WorkingDirectory=/opt/redactor-ia/backend
+Environment=NODE_ENV=production
+EnvironmentFile=/opt/redactor-ia/backend/.env
+ExecStart=/usr/bin/node /opt/redactor-ia/backend/src/server.js
+Restart=always
+RestartSec=5
+
+# Endurece un poco el servicio
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=true
+ReadWritePaths=/opt/redactor-ia/backend
+
+[Install]
+WantedBy=multi-user.target
