@@ -26,6 +26,7 @@ Herramienta web para reformular y mejorar textos usando inteligencia artificial.
 | **i18next** | Internacionalización (español / inglés) |
 | **Lucide React** | Iconos |
 | **clsx + tailwind-merge** | Composición condicional de clases CSS |
+| **Claude Design** | Para demos y modelos de front |
 
 ### Backend
 
