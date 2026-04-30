@@ -1,6 +1,7 @@
 # Archivos de configuración de herramientas de desarrollo
 .serena
 .codex
+.claude
 
 # Dependencias
 node_modules/
