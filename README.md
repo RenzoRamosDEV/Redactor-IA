@@ -7,7 +7,6 @@ Herramienta web para reformular y mejorar textos usando inteligencia artificial.
 ## Preview
 
 ![Captura 1](frontend/src/assets/Captura%20desde%202026-05-13%2015-42-06.png)
-![Captura 2](frontend/src/assets/Captura%20desde%202026-05-13%2015-42-11.png)
 
 ---
 
