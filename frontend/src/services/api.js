@@ -87,13 +87,30 @@ export async function getLimits() {
  * }
  */
 export async function rewriteText({ text, tone, intensity, keepLength, extraInstruction }) {
-  const response = await fetch(`${API_URL}/api/rewrite`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ text, tone, intensity, keepLength, extraInstruction }),
-  });
+  let response;
 
-  const data = await response.json();
+  try {
+    response = await fetch(`${API_URL}/api/rewrite`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text, tone, intensity, keepLength, extraInstruction }),
+    });
+  } catch {
+    // Servidor caído, sin conexión o CORS: el navegador solo da un
+    // "Failed to fetch" que no sirve de nada al usuario. Se marca para que la
+    // interfaz ponga un mensaje propio y traducido.
+    const err = new Error('network');
+    err.isNetworkError = true;
+    throw err;
+  }
+
+  let data;
+  try {
+    data = await response.json();
+  } catch {
+    // Respuesta que no es JSON (un proxy devolviendo HTML, por ejemplo)
+    data = {};
+  }
 
   // Si la respuesta no es OK, lanzar error con mensaje amigable
   if (!response.ok) {

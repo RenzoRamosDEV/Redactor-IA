@@ -1,66 +1,72 @@
 /**
- * Hook personalizado para crear un contador regresivo en tiempo real
- * 
+ * Cuenta atrás en vivo hacia un instante futuro.
+ *
  * @module hooks/useCountdown
  */
 
-import { useState, useEffect } from 'react';
+import { useCallback, useSyncExternalStore } from 'react';
 
 /**
- * Crea un contador regresivo que se actualiza cada segundo
- * 
- * @param {number|null} targetMs - Timestamp Unix (ms) objetivo del countdown
- * @returns {string|null} String formateado "MM:SS" o null si no hay countdown activo
- * 
+ * Milisegundos que faltan para `targetMs`, recalculados cada segundo.
+ *
+ * Devuelve `null` cuando no hay objetivo o cuando ya se ha cumplido, de modo
+ * que el componente puede simplemente ocultar el aviso.
+ *
+ * El reloj es estado externo y mutable, así que se lee con
+ * `useSyncExternalStore`: cada render obtiene la hora de verdad en lugar de
+ * arrastrar la que hubiera al montar el componente. Importa porque el objetivo
+ * llega mucho después del montaje, dentro de la respuesta del backend.
+ *
+ * @param {number|null} targetMs - Timestamp Unix (ms) objetivo
+ * @returns {number|null} Milisegundos restantes, o null
+ *
  * @example
- * const countdown = useCountdown(Date.now() + 15 * 60 * 1000); // 15 minutos
- * // countdown = "14:59", "14:58", ..., null
- * 
- * @example
- * const countdown = useCountdown(null);
- * // countdown = null
+ * const remaining = useCountdown(limits.windowResetAt);
+ * if (remaining) console.log(toMinutes(remaining)); // 4
  */
 export function useCountdown(targetMs) {
-  const [display, setDisplay] = useState(null);
+  const subscribe = useCallback(
+    onClockTick => {
+      if (!targetMs || targetMs <= Date.now()) return () => {};
 
-  useEffect(() => {
-    // Sin objetivo, no hay countdown
-    if (!targetMs) {
-      setDisplay(null);
-      return;
-    }
+      const intervalId = setInterval(() => {
+        onClockTick();
+        if (Date.now() >= targetMs) clearInterval(intervalId);
+      }, 1000);
 
-    /**
-     * Calcula y actualiza el tiempo restante
-     * @private
-     */
-    function tick() {
-      const diff = targetMs - Date.now();
-      
-      // Si ya pasó el tiempo, ocultar countdown
-      if (diff <= 0) {
-        setDisplay(null);
-        return;
-      }
-      
-      // Convertir milisegundos a minutos y segundos
-      const totalSec = Math.ceil(diff / 1000);
-      const minutes = Math.floor(totalSec / 60);
-      const seconds = totalSec % 60;
-      
-      // Formatear como "MM:SS" con ceros a la izquierda
-      setDisplay(
-        `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
-      );
-    }
+      return () => clearInterval(intervalId);
+    },
+    [targetMs]
+  );
 
-    // Ejecutar inmediatamente y luego cada segundo
-    tick();
-    const intervalId = setInterval(tick, 1000);
-    
-    // Cleanup: detener el intervalo cuando el componente se desmonte o targetMs cambie
-    return () => clearInterval(intervalId);
+  // Redondeado al segundo: mientras no cambie el segundo hay que devolver
+  // exactamente el mismo valor, o React volvería a renderizar sin parar.
+  const getRemaining = useCallback(() => {
+    if (!targetMs) return null;
+
+    const remaining = targetMs - Date.now();
+    return remaining > 0 ? Math.ceil(remaining / 1000) * 1000 : null;
   }, [targetMs]);
 
-  return display;
+  return useSyncExternalStore(subscribe, getRemaining, getRemaining);
+}
+
+/**
+ * Minutos restantes redondeados hacia arriba, con mínimo 1.
+ *
+ * @param {number} ms - Milisegundos restantes
+ * @returns {number}
+ */
+export function toMinutes(ms) {
+  return Math.max(1, Math.ceil(ms / 60000));
+}
+
+/**
+ * Segundos restantes redondeados hacia arriba, con mínimo 1.
+ *
+ * @param {number} ms - Milisegundos restantes
+ * @returns {number}
+ */
+export function toSeconds(ms) {
+  return Math.max(1, Math.ceil(ms / 1000));
 }

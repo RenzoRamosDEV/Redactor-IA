@@ -1,84 +1,109 @@
 {
+  "brand": {
+    "name": "Redactor",
+    "badge": "AI"
+  },
   "header": {
-    "title": "AI Text Editor",
-    "subtitle": "Write, improve and rephrase texts with different tones using artificial intelligence.",
-    "windowLabel": "15 min slot",
-    "dailyLabel": "Today (daily)",
-    "windowTooltip": "Attempts limit every 15 minutes",
-    "dailyTooltip": "Daily attempts limit (midnight Spain time)",
-    "resetInTooltip": "Resets in {{countdown}}",
-    "darkModeTooltip": "Switch to dark mode",
-    "lightModeTooltip": "Switch to light mode",
-    "languageTooltip": "Change language"
+    "window": "15 min slot",
+    "today": "Today",
+    "languageLabel": "Language"
   },
-  "textInput": {
-    "title": "Write your text",
-    "subtitle": "Maximum {{maxChars}} characters per attempt.",
-    "placeholder": "Write or paste your text here...",
-    "statusBlocked": "Temporarily blocked",
-    "statusReady": "Ready to write",
-    "charsUsed": "Characters used",
-    "limitExceeded": "Limit exceeded",
-    "reduceText": "Reduce text by {{count}} characters to generate.",
-    "clearButton": "Clear",
-    "generateButton": "Generate text",
-    "generatingButton": "Generating...",
-    "waitingButton": "Waiting",
-    "tooLongButton": "Text too long"
+  "history": {
+    "title": "History",
+    "new": "+ New",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "empty": "Nothing here yet. The texts you rephrase are saved in this browser."
   },
-  "toneSelector": {
-    "title": "Style configuration",
-    "subtitle": "Choose how you want the generated text to look.",
-    "mainTone": "Main tone",
-    "intensityLevel": "Intensity level",
-    "intensitySoft": "Soft",
-    "intensityHigh": "High",
-    "keepLengthTitle": "Keep length",
-    "keepLengthDesc": "Prevents text from growing too much",
-    "extraInstructionTitle": "Extra instruction",
-    "extraInstructionPlaceholder": "E.g.: Make it sound more approachable and convincing, but maintain a professional tone."
+  "document": {
+    "untitled": "Untitled",
+    "rename": "Rename",
+    "renameSave": "Save",
+    "renameLabel": "Document name"
+  },
+  "source": {
+    "label": "Original text",
+    "placeholder": "Write or paste the text you want to rephrase…",
+    "generate": "Rephrase",
+    "generating": "Rephrasing…",
+    "clear": "Clear",
+    "tooLong_one": "{{count}} character over the limit",
+    "tooLong_other": "{{count}} characters over the limit"
   },
   "result": {
-    "title": "Generated result",
-    "subtitle": "Preview of AI-improved text.",
-    "copyButton": "Copy text",
-    "copiedButton": "Copied",
-    "generatingStatus": "Generating response...",
-    "placeholder": "Generated text will appear here...",
-    "systemStatus": "SYSTEM STATUS",
-    "engineLabel": "Writing engine",
-    "engineActive": "Active",
-    "engineBlocked": "Blocked",
-    "toneLabel": "Selected tone",
-    "responseTimeLabel": "Response time",
-    "windowLabel": "15 min slot",
-    "resetInLabel": "Reset in",
-    "dailyLabel": "Today (daily)",
-    "windowProgress": "15 min",
-    "dailyProgress": "Daily",
-    "dailyLimitReached": "Daily limit reached",
-    "windowLimitReached": "Slot limit reached",
-    "dailyLimitMessage": "You've used all {{limit}} attempts for today. Come back tomorrow at 00:00 (Spain time).",
-    "windowLimitMessage": "You've used all {{limit}} attempts for this slot."
+    "label": "Result",
+    "versionsLabel": "Generated versions",
+    "version": "v{{n}}",
+    "tabResult": "Result",
+    "tabCompare": "Compare",
+    "empty": "The rephrased text will appear here.",
+    "thinking": "Rephrasing",
+    "copy": "Copy",
+    "copied": "Copied",
+    "useAsSource": "Use as original",
+    "anotherVariant": "Another variant",
+    "metaSeconds": "{{seconds}} s",
+    "metaIntensity": "intensity {{value}}"
+  },
+  "compare": {
+    "before": "Original",
+    "after": "Rephrased · {{tone}}",
+    "removals_one": "{{count}} removal",
+    "removals_other": "{{count}} removals",
+    "additions_one": "{{count}} addition",
+    "additions_other": "{{count}} additions",
+    "identical": "The result is identical to the original."
+  },
+  "style": {
+    "title": "Style",
+    "intensity": "Intensity",
+    "soft": "Soft",
+    "high": "High",
+    "keepLength": "Keep length",
+    "keepLengthDesc": "Stops the text from growing",
+    "extra": "Extra instruction",
+    "extraPlaceholder": "E.g.: warmer, no jargon…"
+  },
+  "usage": {
+    "title": "Usage",
+    "window": "15 min slot",
+    "daily": "Today (daily)",
+    "renewsInMin_one": "The slot renews in {{count}} min.",
+    "renewsInMin_other": "The slot renews in {{count}} min.",
+    "renewsInSec_one": "The slot renews in {{count}} s.",
+    "renewsInSec_other": "The slot renews in {{count}} s.",
+    "allAvailable_one": "You have {{count}} attempt left in this slot.",
+    "allAvailable_other": "You have {{count}} attempts left in this slot.",
+    "dailyExhausted": "You've used all {{count}} attempts for today. The counter resets at midnight (Spain time)."
+  },
+  "notice": {
+    "windowBlocked": "You've used all {{count}} attempts in this 15-minute slot. Wait for it to renew to continue.",
+    "dailyBlocked": "You've used all {{count}} attempts for today. Come back tomorrow after 00:00 (Spain time)."
+  },
+  "errors": {
+    "generic": "The text could not be rephrased. Please try again.",
+    "network": "No connection to the server. Check that the backend is running and try again."
   },
   "tones": {
-    "rewrite": "Better writing",
-    "formal": "Formal",
-    "fun": "Fun",
-    "casual": "Casual",
-    "professional": "Professional",
-    "direct": "Direct",
-    "persuasive": "Persuasive",
-    "creative": "Creative"
-  },
-  "toneLabels": {
-    "rewrite": "Improve writing",
-    "formal": "Formal",
-    "fun": "Fun",
-    "casual": "Casual",
-    "professional": "Professional",
-    "direct": "Direct",
-    "persuasive": "Persuasive",
-    "creative": "Creative"
+    "option": {
+      "rewrite": "Better writing",
+      "formal": "More formal",
+      "fun": "More fun",
+      "casual": "More casual",
+      "professional": "More professional",
+      "direct": "More direct",
+      "persuasive": "More persuasive",
+      "creative": "More creative"
+    },
+    "short": {
+      "rewrite": "Rewrite",
+      "formal": "Formal",
+      "fun": "Fun",
+      "casual": "Casual",
+      "professional": "Professional",
+      "direct": "Direct",
+      "persuasive": "Persuasive",
+      "creative": "Creative"
+    }
   }
 }

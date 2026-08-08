@@ -1,85 +1,83 @@
 /**
- * Página principal de la aplicación de reformulación de texto
- * 
- * Gestiona el estado global de la aplicación incluyendo:
- * - Formulario de entrada de texto
- * - Configuración de tono e intensidad
- * - Límites de uso (ventana 15min y diario)
- * - Modo oscuro/claro
- * - Resultados de la IA
- * 
+ * Pantalla única de la aplicación.
+ *
+ * Mantiene el documento en edición (texto original, ajustes de estilo y
+ * versiones generadas), habla con el backend y reparte el estado entre el
+ * historial, el editor y el raíl de estilo.
+ *
  * @module pages/Home
  */
 
-import { useState, useEffect, useCallback } from 'react';
-import Header from '../components/Header';
-import TextInputCard from '../components/TextInputCard';
-import ToneSelectorCard from '../components/ToneSelectorCard';
-import ResultCard from '../components/ResultCard';
-import { rewriteText, getLimits } from '../services/api';
-import { lightTheme, darkTheme } from '../styles/theme';
-import { WINDOW_LIMIT, DAILY_LIMIT, DEFAULT_INTENSITY, DEFAULT_KEEP_LENGTH } from '../constants';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import AppHeader from '../components/AppHeader';
+import HistoryRail from '../components/HistoryRail';
+import DocumentHeader from '../components/DocumentHeader';
+import SourceSection from '../components/SourceSection';
+import ResultSection from '../components/ResultSection';
+import StyleRail from '../components/StyleRail';
+import { useDocuments } from '../hooks/useDocuments';
+import { getLimits, rewriteText } from '../services/api';
+import { deriveTitle } from '../utils/documents';
+import {
+  DAILY_LIMIT,
+  DEFAULT_INTENSITY,
+  DEFAULT_KEEP_LENGTH,
+  DEFAULT_TONE,
+  MAX_CHARS,
+  WINDOW_LIMIT,
+} from '../constants';
+
+/** @constant {number} Espera antes de volcar el documento a localStorage */
+const PERSIST_DELAY_MS = 700;
 
 /**
- * Componente principal de la aplicación
- * Orquesta todos los componentes y gestiona el estado compartido
+ * Identificador de documento.
+ * @returns {string}
  */
+function createId() {
+  return crypto.randomUUID
+    ? crypto.randomUUID()
+    : `doc-${Date.now()}-${Math.round(Math.random() * 1e6)}`;
+}
+
+/**
+ * Documento en blanco que hereda los ajustes de estilo actuales.
+ *
+ * @param {Object} [style] - Ajustes de estilo a conservar
+ * @returns {Object}
+ */
+function createDraft(style) {
+  const now = Date.now();
+
+  return {
+    id: createId(),
+    title: '',
+    customTitle: false,
+    original: '',
+    tone: style?.tone ?? DEFAULT_TONE,
+    intensity: style?.intensity ?? DEFAULT_INTENSITY,
+    keepLength: style?.keepLength ?? DEFAULT_KEEP_LENGTH,
+    extraInstruction: style?.extraInstruction ?? '',
+    versions: [],
+    createdAt: now,
+    updatedAt: now,
+  };
+}
+
 export default function Home() {
-  // ──────────────────────────────────────────────────────────────
-  // Estado: Modo oscuro
-  // ──────────────────────────────────────────────────────────────
-  
-  const [darkMode, setDarkMode] = useState(() => {
-    try {
-      return localStorage.getItem('darkMode') === 'true';
-    } catch {
-      return false;
-    }
-  });
+  const { t, i18n } = useTranslation();
+  const language = i18n.resolvedLanguage || 'es';
 
-  const theme = darkMode ? darkTheme : lightTheme;
+  const { documents, saveDocument } = useDocuments();
 
-  /**
-   * Sincroniza el modo oscuro con el DOM y localStorage
-   */
-  useEffect(() => {
-    const root = document.documentElement;
-    root.classList.toggle('dark', darkMode);
-    document.body.style.backgroundColor = theme.pageBg;
-    document.body.style.color = theme.textPrimary;
-    
-    try {
-      localStorage.setItem('darkMode', darkMode);
-    } catch {
-      // Ignorar error de localStorage en modo privado
-    }
-  }, [darkMode, theme.pageBg, theme.textPrimary]);
-
-  const toggleDark = () => setDarkMode(d => !d);
-
-  // ──────────────────────────────────────────────────────────────
-  // Estado: Formulario de entrada
-  // ──────────────────────────────────────────────────────────────
-  
-  const [inputText, setInputText] = useState('');
-  const [selectedTone, setSelectedTone] = useState('rewrite');
-  const [intensity, setIntensity] = useState(DEFAULT_INTENSITY);
-  const [keepLength, setKeepLength] = useState(DEFAULT_KEEP_LENGTH);
-  const [extraInstruction, setExtra] = useState('');
-
-  // ──────────────────────────────────────────────────────────────
-  // Estado: Resultado de la IA
-  // ──────────────────────────────────────────────────────────────
-  
-  const [generatedText, setGeneratedText] = useState('');
+  const [doc, setDoc] = useState(createDraft);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [view, setView] = useState('result');
   const [isLoading, setIsLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
-  const [processingTime, setProcessingTime] = useState(null);
+  const [error, setError] = useState('');
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
-  // ──────────────────────────────────────────────────────────────
-  // Estado: Límites de uso (fuente de verdad: backend)
-  // ──────────────────────────────────────────────────────────────
-  
   const [limits, setLimits] = useState({
     remainingWindow: WINDOW_LIMIT,
     remainingDaily: DAILY_LIMIT,
@@ -88,166 +86,294 @@ export default function Home() {
     blockedBy: null,
   });
 
+  // El documento puede cambiar mientras una petición está en vuelo; guardamos
+  // a cuál pertenece para no colgarle la versión al documento equivocado.
+  const activeDocId = useRef(doc.id);
+  activeDocId.current = doc.id;
+
   const isBlocked = limits.blockedBy !== null;
 
-  /**
-   * Carga el estado inicial de límites desde el backend
-   * Se ejecuta una vez al montar el componente
-   */
+  const title = doc.customTitle
+    ? doc.title
+    : deriveTitle(doc.original, t('document.untitled'));
+
+  const usage = {
+    windowUsed: Math.min(
+      WINDOW_LIMIT,
+      Math.max(0, WINDOW_LIMIT - limits.remainingWindow)
+    ),
+    windowLimit: WINDOW_LIMIT,
+    dailyUsed: Math.min(
+      DAILY_LIMIT,
+      Math.max(0, DAILY_LIMIT - limits.remainingDaily)
+    ),
+    dailyLimit: DAILY_LIMIT,
+  };
+
+  const canGenerate =
+    Boolean(doc.original.trim()) &&
+    doc.original.length <= MAX_CHARS &&
+    !isLoading &&
+    !isBlocked;
+
+  // ── Límites ────────────────────────────────────────────────────────────
+
+  /** Estado inicial de límites: la fuente de verdad es el backend. */
   useEffect(() => {
     getLimits()
       .then(setLimits)
-      .catch(err => console.error('Error loading limits:', err));
+      .catch(() => {
+        /* si el backend no responde, se mantienen los valores optimistas */
+      });
   }, []);
 
-  /**
-   * Auto-desbloqueo cuando expira el tiempo de cooldown
-   * Optimista: desbloquea en el cliente antes de la próxima petición
-   */
+  /** Desbloqueo optimista en cuanto vence el tramo (o el día). */
   useEffect(() => {
     if (!isBlocked) return;
-    
-    const resetAt = limits.blockedBy === 'daily'
-      ? limits.dailyResetAt
-      : limits.windowResetAt;
-    
+
+    const resetAt =
+      limits.blockedBy === 'daily' ? limits.dailyResetAt : limits.windowResetAt;
     if (!resetAt) return;
-    
-    const delay = resetAt - Date.now();
-    
-    if (delay <= 0) {
-      setLimits(prev => ({ ...prev, blockedBy: null }));
-      return;
-    }
-    
+
+    const delay = Math.max(0, resetAt - Date.now());
     const timeoutId = setTimeout(() => {
       setLimits(prev => ({ ...prev, blockedBy: null }));
     }, delay);
-    
+
     return () => clearTimeout(timeoutId);
   }, [isBlocked, limits.blockedBy, limits.windowResetAt, limits.dailyResetAt]);
 
-  // ──────────────────────────────────────────────────────────────
-  // Handlers
-  // ──────────────────────────────────────────────────────────────
-  
+  // ── Persistencia ───────────────────────────────────────────────────────
+
+  /** Solo se guardan documentos con algún resultado, y con algo de retardo. */
+  useEffect(() => {
+    if (doc.versions.length === 0) return;
+
+    const timeoutId = setTimeout(() => {
+      saveDocument({ ...doc, title });
+    }, PERSIST_DELAY_MS);
+
+    return () => clearTimeout(timeoutId);
+  }, [doc, title, saveDocument]);
+
+  // ── Acciones ───────────────────────────────────────────────────────────
+
   /**
-   * Envía el texto al backend para ser reformulado
-   * Actualiza el estado de límites con la respuesta del servidor
+   * Aplica cambios parciales al documento en edición.
+   * @param {Object} patch - Campos a sobrescribir
    */
+  const updateDoc = useCallback(patch => {
+    setDoc(prev => ({ ...prev, ...patch }));
+  }, []);
+
   const handleGenerate = useCallback(async () => {
-    if (!inputText.trim() || isLoading || isBlocked) return;
-    
+    if (!canGenerate) return;
+
+    const requestDocId = doc.id;
+    const request = {
+      text: doc.original,
+      tone: doc.tone,
+      intensity: doc.intensity,
+      keepLength: doc.keepLength,
+      extraInstruction: doc.extraInstruction,
+    };
+
     setIsLoading(true);
-    setErrorMessage('');
-    setGeneratedText('');
+    setError('');
+    setView('result');
 
     try {
-      const data = await rewriteText({
-        text: inputText,
-        tone: selectedTone,
-        intensity,
-        keepLength,
-        extraInstruction,
-      });
-      
-      setGeneratedText(data.result);
-      setProcessingTime((data.meta?.processingTimeMs / 1000).toFixed(1));
-      
-      // Actualizar límites desde la respuesta del servidor
-      if (data.limits) {
-        setLimits({ ...data.limits, blockedBy: null });
-      }
+      const data = await rewriteText(request);
+
+      if (data.limits) setLimits({ ...data.limits, blockedBy: null });
+
+      // Se cambió de documento mientras respondía la IA: el resultado ya no
+      // corresponde a lo que hay en pantalla.
+      if (activeDocId.current !== requestDocId) return;
+
+      const version = {
+        text: data.result,
+        original: request.text,
+        tone: request.tone,
+        intensity: request.intensity,
+        keepLength: request.keepLength,
+        extraInstruction: request.extraInstruction,
+        processingTimeMs: data.meta?.processingTimeMs ?? null,
+        createdAt: Date.now(),
+      };
+
+      setDoc(prev => ({
+        ...prev,
+        versions: [...prev.versions, version],
+        updatedAt: Date.now(),
+      }));
+      setActiveIndex(doc.versions.length);
     } catch (err) {
-      // Error de límite alcanzado (429)
-      if (err.limits) {
-        setLimits(err.limits);
-      } else if (err.message?.includes('429') || err.message?.toLowerCase().includes('límite')) {
-        // Fallback: marcar como bloqueado si no viene el estado
-        setLimits(prev => ({ ...prev, remainingWindow: 0, blockedBy: 'window' }));
+      if (err.limits) setLimits(err.limits);
+      if (activeDocId.current === requestDocId) {
+        setError(
+          err.isNetworkError
+            ? t('errors.network')
+            : err.message || t('errors.generic')
+        );
       }
-      
-      setErrorMessage(err.message || 'Error desconocido. Inténtalo de nuevo.');
     } finally {
       setIsLoading(false);
     }
-  }, [inputText, selectedTone, intensity, keepLength, extraInstruction, isLoading, isBlocked]);
+  }, [canGenerate, doc, t]);
+
+  const handleSelectDocument = useCallback(
+    id => {
+      const stored = documents.find(d => d.id === id);
+      if (!stored) return;
+
+      setDoc(stored);
+      setActiveIndex(Math.max(0, stored.versions.length - 1));
+      setView('result');
+      setError('');
+      setDrawerOpen(false);
+    },
+    [documents]
+  );
+
+  const handleNewDocument = useCallback(() => {
+    setDoc(current => createDraft(current));
+    setActiveIndex(0);
+    setView('result');
+    setError('');
+    setDrawerOpen(false);
+  }, []);
+
+  const handleClear = useCallback(() => {
+    updateDoc({ original: '' });
+    setError('');
+  }, [updateDoc]);
+
+  const handleRename = useCallback(
+    newTitle => {
+      updateDoc({ title: newTitle, customTitle: true, updatedAt: Date.now() });
+    },
+    [updateDoc]
+  );
+
+  const handleUseAsSource = useCallback(
+    text => {
+      updateDoc({ original: text });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    },
+    [updateDoc]
+  );
+
+  // ── Presentación ───────────────────────────────────────────────────────
+
+  const secondsFormat = useMemo(
+    () =>
+      new Intl.NumberFormat(language, {
+        minimumFractionDigits: 1,
+        maximumFractionDigits: 1,
+      }),
+    [language]
+  );
 
   /**
-   * Limpia el formulario y los resultados
+   * Línea de metadatos de una versión: "1,4 s · profesional · intensidad 60".
    */
-  const handleClear = () => {
-    setInputText('');
-    setGeneratedText('');
-    setErrorMessage('');
-    setProcessingTime(null);
-  };
+  const formatMeta = useCallback(
+    version =>
+      [
+        version.processingTimeMs != null &&
+          t('result.metaSeconds', {
+            seconds: secondsFormat.format(version.processingTimeMs / 1000),
+          }),
+        t(`tones.short.${version.tone}`).toLowerCase(),
+        t('result.metaIntensity', { value: version.intensity }),
+      ]
+        .filter(Boolean)
+        .join(' · '),
+    [t, secondsFormat]
+  );
 
-  // ──────────────────────────────────────────────────────────────
-  // Render
-  // ──────────────────────────────────────────────────────────────
-  
+  const blockedNotice = isBlocked
+    ? limits.blockedBy === 'daily'
+      ? t('notice.dailyBlocked', { count: DAILY_LIMIT })
+      : t('notice.windowBlocked', { count: WINDOW_LIMIT })
+    : '';
+
+  /** El cajón del historial se cierra con Escape. */
+  useEffect(() => {
+    if (!drawerOpen) return;
+
+    const onKeyDown = event => {
+      if (event.key === 'Escape') setDrawerOpen(false);
+    };
+
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [drawerOpen]);
+
   return (
-    <div style={{
-      minHeight: '100vh',
-      background: theme.pageBg,
-      padding: '40px 24px',
-      transition: 'background 0.2s',
-    }}>
-      <div style={{ maxWidth: '980px', margin: '0 auto' }}>
-        {/* Cabecera con contadores y toggle de modo oscuro */}
-        <Header
-          limits={limits}
-          windowLimit={WINDOW_LIMIT}
-          dailyLimit={DAILY_LIMIT}
-          darkMode={darkMode}
-          onToggleDark={toggleDark}
-          theme={theme}
+    <div className={`app${drawerOpen ? ' app--drawer-open' : ''}`}>
+      <AppHeader
+        usage={usage}
+        drawerOpen={drawerOpen}
+        onToggleDrawer={() => setDrawerOpen(open => !open)}
+      />
+
+      <div className="app-shell">
+        <HistoryRail
+          documents={documents}
+          activeId={doc.id}
+          onSelect={handleSelectDocument}
+          onNew={handleNewDocument}
         />
 
-        {/* Grid de entrada y configuración */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: '1fr 340px',
-          gap: '20px',
-          marginBottom: '20px',
-        }}>
-          {/* Tarjeta de entrada de texto */}
-          <TextInputCard
-            inputText={inputText}
-            onInputChange={setInputText}
-            onClear={handleClear}
-            onGenerate={handleGenerate}
-            isLoading={isLoading}
-            isBlocked={isBlocked}
-            errorMessage={errorMessage}
-            theme={theme}
-          />
-          
-          {/* Tarjeta de configuración de tono */}
-          <ToneSelectorCard
-            selectedTone={selectedTone}
-            onToneChange={setSelectedTone}
-            intensity={intensity}
-            onIntensityChange={setIntensity}
-            keepLength={keepLength}
-            onKeepLengthChange={setKeepLength}
-            extraInstruction={extraInstruction}
-            onExtraInstructionChange={setExtra}
-            theme={theme}
-          />
-        </div>
+        <div
+          className="drawer-backdrop"
+          onClick={() => setDrawerOpen(false)}
+          aria-hidden="true"
+        />
 
-        {/* Tarjeta de resultado */}
-        <ResultCard
-          generatedText={generatedText}
-          isLoading={isLoading}
-          selectedTone={selectedTone}
-          processingTime={processingTime}
+        <main className="editor">
+          <DocumentHeader title={title} onRename={handleRename} />
+
+          <SourceSection
+            value={doc.original}
+            onChange={original => updateDoc({ original })}
+            onGenerate={handleGenerate}
+            onClear={handleClear}
+            isLoading={isLoading}
+            canGenerate={canGenerate}
+          />
+
+          <ResultSection
+            versions={doc.versions}
+            activeIndex={activeIndex}
+            onSelectVersion={setActiveIndex}
+            view={view}
+            onViewChange={setView}
+            isLoading={isLoading}
+            error={error}
+            blockedNotice={blockedNotice}
+            onUseAsSource={handleUseAsSource}
+            onGenerate={handleGenerate}
+            canGenerate={canGenerate}
+            formatMeta={formatMeta}
+          />
+        </main>
+
+        <StyleRail
+          tone={doc.tone}
+          onToneChange={tone => updateDoc({ tone })}
+          intensity={doc.intensity}
+          onIntensityChange={intensity => updateDoc({ intensity })}
+          keepLength={doc.keepLength}
+          onKeepLengthChange={keepLength => updateDoc({ keepLength })}
+          extraInstruction={doc.extraInstruction}
+          onExtraInstructionChange={extraInstruction =>
+            updateDoc({ extraInstruction })
+          }
+          usage={usage}
           limits={limits}
-          windowLimit={WINDOW_LIMIT}
-          dailyLimit={DAILY_LIMIT}
-          theme={theme}
         />
       </div>
     </div>

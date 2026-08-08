@@ -1,56 +1,36 @@
 /**
- * Configuración de tonos disponibles para reformulación de texto
- * 
- * Define los diferentes estilos que puede aplicar la IA al texto.
+ * Tonos disponibles para reformular el texto.
+ *
+ * Solo se guardan los identificadores: las etiquetas visibles viven en
+ * `locales/*.json` bajo `tones.option.*` (lista del raíl) y `tones.short.*`
+ * (línea de metadatos y historial).
+ *
+ * @module constants/tones
  */
 
-/**
- * @typedef {Object} Tone
- * @property {string} id - Identificador único del tono
- * @property {string} label - Etiqueta visible para el usuario
- */
-
-/** @type {Tone[]} Lista de tonos disponibles */
-export const TONES = [
-  { id: 'rewrite', label: 'Mejor redacción' },
-  { id: 'formal', label: 'Más formal' },
-  { id: 'fun', label: 'Más divertido' },
-  { id: 'casual', label: 'Más casual' },
-  { id: 'professional', label: 'Más profesional' },
-  { id: 'direct', label: 'Más directo' },
-  { id: 'persuasive', label: 'Más persuasivo' },
-  { id: 'creative', label: 'Más creativo' },
+/** @type {string[]} Identificadores en el orden en que se muestran */
+export const TONE_IDS = [
+  'rewrite',
+  'formal',
+  'fun',
+  'casual',
+  'professional',
+  'direct',
+  'persuasive',
+  'creative',
 ];
 
-/**
- * Mapeo de IDs de tono a sus etiquetas
- * Útil para mostrar el tono seleccionado sin buscar en el array
- */
-export const TONE_LABELS = {
-  rewrite: 'Mejorar redacción',
-  formal: 'Formal',
-  fun: 'Divertido',
-  casual: 'Casual',
-  professional: 'Profesional',
-  direct: 'Directo',
-  persuasive: 'Persuasivo',
-  creative: 'Creativo',
-};
-
-/** @constant {number} Máximo de caracteres permitidos por intento */
+/** @constant {number} Máximo de caracteres del texto original por intento */
 export const MAX_CHARS = 500;
 
-/** @constant {string} Tono por defecto */
+/** @constant {string} Tono preseleccionado */
 export const DEFAULT_TONE = 'rewrite';
 
-/** @constant {number} Valor por defecto de intensidad (0-100) */
+/** @constant {number} Intensidad inicial (0-100) */
 export const DEFAULT_INTENSITY = 60;
 
-/** @constant {boolean} Valor por defecto para mantener longitud del texto */
+/** @constant {boolean} Si por defecto se limita el crecimiento del texto */
 export const DEFAULT_KEEP_LENGTH = true;
 
-/** @constant {string} Valor por defecto para instrucción extra */
-export const DEFAULT_EXTRA_INSTRUCTION = '';
-
-/** @constant {number} Máximo de caracteres para instrucción extra */
+/** @constant {number} Máximo de caracteres de la instrucción extra */
 export const MAX_EXTRA_INSTRUCTION_CHARS = 200;

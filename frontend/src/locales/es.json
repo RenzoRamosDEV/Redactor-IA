@@ -1,84 +1,109 @@
 {
+  "brand": {
+    "name": "Redactor",
+    "badge": "IA"
+  },
   "header": {
-    "title": "Redactor IA de textos",
-    "subtitle": "Escribe, mejora y reformula textos con distintos tonos usando inteligencia artificial.",
-    "windowLabel": "Tramo 15 min",
-    "dailyLabel": "Hoy (diario)",
-    "windowTooltip": "Límite de intentos cada 15 minutos",
-    "dailyTooltip": "Límite de intentos por día (medianoche España)",
-    "resetInTooltip": "Se reinicia en {{countdown}}",
-    "darkModeTooltip": "Cambiar a modo oscuro",
-    "lightModeTooltip": "Cambiar a modo claro",
-    "languageTooltip": "Cambiar idioma"
+    "window": "Tramo 15 min",
+    "today": "Hoy",
+    "languageLabel": "Idioma"
   },
-  "textInput": {
-    "title": "Escribe tu texto",
-    "subtitle": "Máximo {{maxChars}} caracteres por intento.",
-    "placeholder": "Escribe o pega tu texto aquí...",
-    "statusBlocked": "Bloqueado temporalmente",
-    "statusReady": "Listo para redactar",
-    "charsUsed": "Caracteres usados",
-    "limitExceeded": "Límite excedido",
-    "reduceText": "Reduce el texto en {{count}} caracteres para poder generar.",
-    "clearButton": "Limpiar",
-    "generateButton": "Generar texto",
-    "generatingButton": "Generando...",
-    "waitingButton": "En espera",
-    "tooLongButton": "Texto muy largo"
+  "history": {
+    "title": "Historial",
+    "new": "+ Nuevo",
+    "today": "Hoy",
+    "yesterday": "Ayer",
+    "empty": "Todavía no hay nada aquí. Los textos que reformules se guardan en este navegador."
   },
-  "toneSelector": {
-    "title": "Configuración del estilo",
-    "subtitle": "Elige cómo quieres que se vea el texto generado.",
-    "mainTone": "Tono principal",
-    "intensityLevel": "Nivel de intensidad",
-    "intensitySoft": "Suave",
-    "intensityHigh": "Alto",
-    "keepLengthTitle": "Mantener longitud",
-    "keepLengthDesc": "Evita que el texto crezca demasiado",
-    "extraInstructionTitle": "Instrucción extra",
-    "extraInstructionPlaceholder": "Ej.: Haz que suene más cercano y convincente, pero manteniendo un tono profesional."
+  "document": {
+    "untitled": "Sin título",
+    "rename": "Renombrar",
+    "renameSave": "Guardar",
+    "renameLabel": "Nombre del documento"
+  },
+  "source": {
+    "label": "Texto original",
+    "placeholder": "Escribe o pega aquí el texto que quieres reformular…",
+    "generate": "Reformular",
+    "generating": "Reformulando…",
+    "clear": "Limpiar",
+    "tooLong_one": "Sobra {{count}} carácter",
+    "tooLong_other": "Sobran {{count}} caracteres"
   },
   "result": {
-    "title": "Resultado generado",
-    "subtitle": "Vista previa del texto mejorado por la IA.",
-    "copyButton": "Copiar texto",
-    "copiedButton": "Copiado",
-    "generatingStatus": "Generando respuesta...",
-    "placeholder": "El texto generado aparecerá aquí...",
-    "systemStatus": "ESTADO DEL SISTEMA",
-    "engineLabel": "Motor de redacción",
-    "engineActive": "Activo",
-    "engineBlocked": "Bloqueado",
-    "toneLabel": "Tono seleccionado",
-    "responseTimeLabel": "Tiempo de respuesta",
-    "windowLabel": "Tramo 15 min",
-    "resetInLabel": "Reinicio en",
-    "dailyLabel": "Hoy (diario)",
-    "windowProgress": "15 min",
-    "dailyProgress": "Diario",
-    "dailyLimitReached": "Límite diario alcanzado",
-    "windowLimitReached": "Límite de tramo alcanzado",
-    "dailyLimitMessage": "Has agotado los {{limit}} intentos de hoy. Vuelve mañana a las 00:00 (hora de España).",
-    "windowLimitMessage": "Has usado los {{limit}} intentos del tramo."
+    "label": "Resultado",
+    "versionsLabel": "Versiones generadas",
+    "version": "v{{n}}",
+    "tabResult": "Resultado",
+    "tabCompare": "Comparar",
+    "empty": "El texto reformulado aparecerá aquí.",
+    "thinking": "Reformulando",
+    "copy": "Copiar",
+    "copied": "Copiado",
+    "useAsSource": "Usar como original",
+    "anotherVariant": "Otra variante",
+    "metaSeconds": "{{seconds}} s",
+    "metaIntensity": "intensidad {{value}}"
+  },
+  "compare": {
+    "before": "Original",
+    "after": "Reformulado · {{tone}}",
+    "removals_one": "{{count}} eliminación",
+    "removals_other": "{{count}} eliminaciones",
+    "additions_one": "{{count}} adición",
+    "additions_other": "{{count}} adiciones",
+    "identical": "El resultado es idéntico al original."
+  },
+  "style": {
+    "title": "Estilo",
+    "intensity": "Intensidad",
+    "soft": "Suave",
+    "high": "Alto",
+    "keepLength": "Mantener longitud",
+    "keepLengthDesc": "Evita que el texto crezca",
+    "extra": "Instrucción extra",
+    "extraPlaceholder": "Ej.: más cercano, sin tecnicismos…"
+  },
+  "usage": {
+    "title": "Uso",
+    "window": "Tramo 15 min",
+    "daily": "Hoy (diario)",
+    "renewsInMin_one": "El tramo se renueva en {{count}} min.",
+    "renewsInMin_other": "El tramo se renueva en {{count}} min.",
+    "renewsInSec_one": "El tramo se renueva en {{count}} s.",
+    "renewsInSec_other": "El tramo se renueva en {{count}} s.",
+    "allAvailable_one": "Te queda {{count}} intento en este tramo.",
+    "allAvailable_other": "Te quedan {{count}} intentos en este tramo.",
+    "dailyExhausted": "Has agotado los {{count}} intentos de hoy. El contador vuelve a cero a medianoche (hora de España)."
+  },
+  "notice": {
+    "windowBlocked": "Has usado los {{count}} intentos de este tramo de 15 minutos. Espera a que se renueve para seguir.",
+    "dailyBlocked": "Has agotado los {{count}} intentos de hoy. Vuelve mañana a partir de las 00:00 (hora de España)."
+  },
+  "errors": {
+    "generic": "No se ha podido reformular el texto. Inténtalo de nuevo.",
+    "network": "No hay conexión con el servidor. Comprueba que el backend está levantado e inténtalo de nuevo."
   },
   "tones": {
-    "rewrite": "Mejor redacción",
-    "formal": "Formal",
-    "fun": "Divertido",
-    "casual": "Casual",
-    "professional": "Profesional",
-    "direct": "Directo",
-    "persuasive": "Persuasivo",
-    "creative": "Creativo"
-  },
-  "toneLabels": {
-    "rewrite": "Mejorar redacción",
-    "formal": "Formal",
-    "fun": "Divertido",
-    "casual": "Casual",
-    "professional": "Profesional",
-    "direct": "Directo",
-    "persuasive": "Persuasivo",
-    "creative": "Creativo"
+    "option": {
+      "rewrite": "Mejor redacción",
+      "formal": "Más formal",
+      "fun": "Más divertido",
+      "casual": "Más casual",
+      "professional": "Más profesional",
+      "direct": "Más directo",
+      "persuasive": "Más persuasivo",
+      "creative": "Más creativo"
+    },
+    "short": {
+      "rewrite": "Redacción",
+      "formal": "Formal",
+      "fun": "Divertido",
+      "casual": "Casual",
+      "professional": "Profesional",
+      "direct": "Directo",
+      "persuasive": "Persuasivo",
+      "creative": "Creativo"
+    }
   }
 }
