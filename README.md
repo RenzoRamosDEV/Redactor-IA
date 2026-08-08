@@ -43,8 +43,7 @@ Tipografías: **Public Sans** (interfaz), **Newsreader** (texto redactado) y **J
 | Tecnología | Uso |
 |---|---|
 | **Node.js + Express 5** | Servidor HTTP y API REST |
-| **Groq SDK** | Cliente para llamar al modelo LLM |
-| **Llama 3.3 70B** | Modelo de IA que reformula el texto (vía Groq) |
+| **API de Gemini** | Modelo de IA que reformula el texto y nombra el documento |
 | **Helmet** | Headers de seguridad HTTP |
 | **CORS** | Control de acceso entre origen frontend y backend |
 | **express-rate-limit** | Límite de uso por IP (8 intentos/15min, 40/día) |
@@ -71,7 +70,7 @@ redactor-ia/
     └── src/
         ├── routes/        # POST /api/rewrite, GET /api/limits
         ├── controllers/   # Lógica de las rutas
-        ├── services/      # Integración con Groq API
+        ├── services/      # Integración con la API de Gemini
         ├── middlewares/   # Rate limiting, manejo de errores
         └── utils/         # Construcción del prompt
 ```
@@ -95,13 +94,15 @@ Atajo: `⌘/Ctrl + Enter` reformula sin salir del área de texto.
 Crea un archivo `.env` en la carpeta `backend/`:
 
 ```env
-GROQ_API_KEY=tu_api_key_de_groq
+GEMINI_API_KEY=tu_api_key_de_google_ai_studio
 PORT=3001
+# Opcional: modelo a usar (por defecto gemini-3.6-flash)
+GEMINI_MODEL=gemini-3.6-flash
 # Opcional: URL del frontend en producción
 FRONTEND_URL=https://tu-dominio.com
 ```
 
-Obtén tu API key gratis en: https://console.groq.com/keys
+Obtén tu API key gratis en: https://aistudio.google.com/apikey
 
 ### 2. Instalar dependencias
 
