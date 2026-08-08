@@ -6,7 +6,7 @@ Herramienta web para reformular y mejorar textos usando inteligencia artificial.
 
 ## Preview
 
-![Captura 1](frontend/src/assets/Captura%20desde%202026-05-13%2015-42-06.png)
+![Vista de resultado](docs/preview-resultado.png)
 
 ---
 
@@ -17,6 +17,9 @@ Herramienta web para reformular y mejorar textos usando inteligencia artificial.
 - **Ajustar la intensidad** del cambio (desde leve retoque hasta reescritura total)
 - **Mantener o liberar la longitud** del texto original según necesidad
 - **Agregar instrucciones extra** para personalizar el resultado
+- **Generar varias variantes** del mismo texto y alternar entre ellas
+- **Comparar** el original y el resultado palabra por palabra
+- **Recuperar textos anteriores** desde el historial (guardado en el navegador)
 
 ---
 
@@ -28,11 +31,11 @@ Herramienta web para reformular y mejorar textos usando inteligencia artificial.
 |---|---|
 | **React 19** | Framework UI principal |
 | **Vite** | Bundler y servidor de desarrollo |
-| **Tailwind CSS** | Estilos y diseño responsive |
+| **CSS propio** | Sistema de diseño con custom properties (sin framework de utilidades) |
 | **i18next** | Internacionalización (español / inglés) |
-| **Lucide React** | Iconos |
-| **clsx + tailwind-merge** | Composición condicional de clases CSS |
-| **Claude Design** | Para demos y modelos de front |
+| **localStorage** | Historial de documentos, sin backend de persistencia |
+
+Tipografías: **Public Sans** (interfaz), **Newsreader** (texto redactado) y **JetBrains Mono** (metadatos y contadores).
 
 ### Backend
 
@@ -54,11 +57,15 @@ Herramienta web para reformular y mejorar textos usando inteligencia artificial.
 redactor-ia/
 ├── frontend/          # App React (Vite)
 │   └── src/
-│       ├── components/    # Header, TextInputCard, ToneSelectorCard, ResultCard
-│       ├── pages/         # Home.jsx (estado global)
+│       ├── components/    # AppHeader, HistoryRail, DocumentHeader,
+│       │                  # SourceSection, ResultSection, DiffView, StyleRail
+│       ├── pages/         # Home.jsx (estado del documento en edición)
+│       ├── hooks/         # useDocuments (historial), useCountdown (reinicio del tramo)
+│       ├── utils/         # diffWords (comparación), documents (títulos y agrupación)
 │       ├── services/      # Llamadas a la API del backend
 │       ├── locales/       # Traducciones es.json / en.json
-│       └── constants/     # Tonos, límites, configuración
+│       ├── constants/     # Tonos, límites, valores por defecto
+│       └── index.css      # Tokens de diseño y estilos de toda la interfaz
 └── backend/           # API Express (Node.js)
     └── src/
         ├── routes/        # POST /api/rewrite, GET /api/limits
@@ -67,6 +74,16 @@ redactor-ia/
         ├── middlewares/   # Rate limiting, manejo de errores
         └── utils/         # Construcción del prompt
 ```
+
+### Cómo se organiza la interfaz
+
+La pantalla es un único espacio de trabajo de tres columnas:
+
+- **Izquierda — Historial.** Cada texto reformulado se guarda como documento, agrupado por día. Solo se guardan los que tienen al menos un resultado, y se conservan los 40 más recientes. Por debajo de 1280 px pasa a ser un cajón lateral.
+- **Centro — Documento.** Título (derivado del texto o renombrado a mano), texto original con contador de caracteres y el resultado. Las sucesivas generaciones del mismo documento se acumulan como versiones (`v1`, `v2`…) y la pestaña *Comparar* enfrenta el original con el resultado marcando lo eliminado y lo añadido.
+- **Derecha — Estilo.** Tono, intensidad, longitud, instrucción extra y consumo de intentos con el tiempo que falta para recuperar el tramo.
+
+Atajo: `⌘/Ctrl + Enter` reformula sin salir del área de texto.
 
 ---
 
@@ -99,7 +116,7 @@ npm install --prefix frontend
 node backend/src/server.js & npm run dev --prefix frontend
 ```
 
-- Frontend: http://localhost:5173
+- Frontend: http://localhost:5173/redactor-ia/
 - Backend: http://localhost:3001
 - Health check: http://localhost:3001/health
 
@@ -118,3 +135,5 @@ Para evitar abuso de la API de IA, el backend aplica rate limiting por IP:
 - **8 intentos** por ventana de 15 minutos
 - **40 intentos** por día (reset a medianoche)
 - Máximo **500 caracteres** por texto de entrada
+
+El frontend sincroniza estos contadores con `GET /api/limits` al cargar y con la respuesta de cada reformulación, así que lo que se muestra en pantalla siempre viene del servidor.
