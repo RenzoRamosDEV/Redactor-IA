@@ -219,7 +219,9 @@ h3 {
   padding: 3px 8px;
 }
 
+/* Solo separa la marca del botón de historial, así que aparece con él */
 .header-rule {
+  display: none;
   width: 1px;
   height: 20px;
   background: var(--line);
@@ -230,33 +232,6 @@ h3 {
   display: flex;
   align-items: center;
   gap: 22px;
-}
-
-.usage-chip {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-}
-
-.usage-chip-label {
-  font-family: var(--mono);
-  font-size: 10px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--ink-faint);
-}
-
-.usage-chip-value {
-  font-family: var(--mono);
-  font-size: 13px;
-}
-
-.usage-chip-total {
-  color: var(--ink-fainter);
-}
-
-.usage-chip--maxed .usage-chip-value {
-  color: var(--warn);
 }
 
 .lang-switch {
@@ -1100,7 +1075,8 @@ input[type="range"]::-moz-range-thumb {
     grid-template-columns: minmax(0, 1fr) var(--rail-right);
   }
 
-  .drawer-toggle {
+  .drawer-toggle,
+  .header-rule {
     display: flex;
   }
 
@@ -1178,12 +1154,6 @@ input[type="range"]::-moz-range-thumb {
   .app-header {
     padding: 0 16px;
     gap: 12px;
-  }
-
-  /* En móvil el header se queda con marca, idioma y acceso al historial */
-  .header-rule,
-  .usage-chip {
-    display: none;
   }
 
   .header-right {
