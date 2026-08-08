@@ -93,9 +93,10 @@ export default function Home() {
 
   const isBlocked = limits.blockedBy !== null;
 
-  const title = doc.customTitle
-    ? doc.title
-    : deriveTitle(doc.original, t('document.untitled'));
+  // El nombre lo pone la IA en la primera reformulación y el usuario puede
+  // cambiarlo. Hasta entonces se deriva del propio texto, para no dejar el
+  // documento sin nombre mientras se escribe.
+  const title = doc.title || deriveTitle(doc.original, t('document.untitled'));
 
   const usage = {
     windowUsed: Math.min(
@@ -176,6 +177,9 @@ export default function Home() {
       intensity: doc.intensity,
       keepLength: doc.keepLength,
       extraInstruction: doc.extraInstruction,
+      // Solo en la primera reformulación del documento, y nunca si el usuario
+      // ya le ha puesto nombre a mano.
+      needsTitle: doc.versions.length === 0 && !doc.customTitle,
     };
 
     setIsLoading(true);
@@ -204,6 +208,9 @@ export default function Home() {
 
       setDoc(prev => ({
         ...prev,
+        // Un rename manual siempre gana al nombre propuesto por la IA
+        title:
+          data.meta?.title && !prev.customTitle ? data.meta.title : prev.title,
         versions: [...prev.versions, version],
         updatedAt: Date.now(),
       }));
@@ -222,27 +229,40 @@ export default function Home() {
     }
   }, [canGenerate, doc, t]);
 
+  /**
+   * Vuelca el documento actual antes de dejarlo.
+   *
+   * El guardado normal va con retardo para no escribir en cada tecla, pero al
+   * cambiar de documento ese temporizador se cancela: sin este volcado, quien
+   * genera un texto y pulsa "+ Nuevo" enseguida lo pierde.
+   */
+  const persistCurrent = useCallback(() => {
+    if (doc.versions.length > 0) saveDocument({ ...doc, title });
+  }, [doc, title, saveDocument]);
+
   const handleSelectDocument = useCallback(
     id => {
       const stored = documents.find(d => d.id === id);
       if (!stored) return;
 
+      persistCurrent();
       setDoc(stored);
       setActiveIndex(Math.max(0, stored.versions.length - 1));
       setView('result');
       setError('');
       setDrawerOpen(false);
     },
-    [documents]
+    [documents, persistCurrent]
   );
 
   const handleNewDocument = useCallback(() => {
-    setDoc(current => createDraft(current));
+    persistCurrent();
+    setDoc(createDraft(doc));
     setActiveIndex(0);
     setView('result');
     setError('');
     setDrawerOpen(false);
-  }, []);
+  }, [doc, persistCurrent]);
 
   const handleClear = useCallback(() => {
     updateDoc({ original: '' });

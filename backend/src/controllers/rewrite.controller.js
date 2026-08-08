@@ -15,8 +15,28 @@
 
 const { validateInput } = require('../utils/inputValidator');
 const { validateOutput } = require('../utils/outputValidator');
-const { buildPrompt } = require('../utils/promptBuilder');
-const { reformulateText } = require('../services/groq.service');
+const { buildPrompt, buildTitlePrompt } = require('../utils/promptBuilder');
+const { cleanTitle } = require('../utils/titleFormatter');
+const { reformulateText, generateTitle } = require('../services/groq.service');
+
+/**
+ * Propone un nombre para el documento a partir del texto original.
+ *
+ * Es accesorio: si falla, la reformulación ya está hecha y no tiene sentido
+ * devolver un error por no haber podido titularla. El cliente se queda con su
+ * nombre derivado del texto.
+ *
+ * @param {string} text - Texto original del usuario
+ * @returns {Promise<string|null>} Título limpio, o null si no se pudo generar
+ */
+async function resolveTitle(text) {
+  try {
+    return cleanTitle(await generateTitle(buildTitlePrompt(text)));
+  } catch (err) {
+    console.error('[rewrite] no se pudo generar el título:', err.message);
+    return null;
+  }
+}
 
 /**
  * POST /api/rewrite
@@ -55,10 +75,10 @@ const { reformulateText } = require('../services/groq.service');
 async function rewrite(req, res, next) {
   try {
     // Extraer parámetros del body
-    const { text, tone, intensity, keepLength, extraInstruction } = req.body;
+    const { text, tone, intensity, keepLength, extraInstruction, needsTitle } = req.body;
 
     // Validar entrada (longitud, tipos, valores permitidos)
-    const validationError = validateInput({ text, tone, intensity, keepLength, extraInstruction });
+    const validationError = validateInput({ text, tone, intensity, keepLength, extraInstruction, needsTitle });
     if (validationError) {
       return res.status(400).json({ error: validationError });
     }
@@ -78,12 +98,17 @@ async function rewrite(req, res, next) {
       });
     }
 
+    // El nombre del documento se pide una sola vez, en su primera
+    // reformulación; después el cliente ya lo tiene guardado.
+    const title = needsTitle ? await resolveTitle(text) : null;
+
     // Responder con resultado, metadata y estado de límites
     return res.json({
       result,
       meta: {
         toneApplied: tone,
         processingTimeMs,
+        title,
       },
       limits: req.rateLimitState || null,
     });

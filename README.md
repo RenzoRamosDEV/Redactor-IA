@@ -17,6 +17,7 @@ Herramienta web para reformular y mejorar textos usando inteligencia artificial.
 - **Ajustar la intensidad** del cambio (desde leve retoque hasta reescritura total)
 - **Mantener o liberar la longitud** del texto original según necesidad
 - **Agregar instrucciones extra** para personalizar el resultado
+- **Nombrar el documento automáticamente** a partir del texto, con la propia IA
 - **Generar varias variantes** del mismo texto y alternar entre ellas
 - **Comparar** el original y el resultado palabra por palabra
 - **Recuperar textos anteriores** desde el historial (guardado en el navegador)
@@ -80,7 +81,7 @@ redactor-ia/
 La pantalla es un único espacio de trabajo de tres columnas:
 
 - **Izquierda — Historial.** Cada texto reformulado se guarda como documento, agrupado por día. Solo se guardan los que tienen al menos un resultado, y se conservan los 40 más recientes. Por debajo de 1280 px pasa a ser un cajón lateral.
-- **Centro — Documento.** Título (derivado del texto o renombrado a mano), texto original con contador de caracteres y el resultado. Las sucesivas generaciones del mismo documento se acumulan como versiones (`v1`, `v2`…) y la pestaña *Comparar* enfrenta el original con el resultado marcando lo eliminado y lo añadido.
+- **Centro — Documento.** Título, texto original con contador de caracteres y el resultado. El nombre lo propone la IA en la primera reformulación de cada documento —una sola vez, no en las siguientes variantes— y siempre se puede cambiar a mano. Mientras se escribe, antes de esa primera llamada, se deriva de la primera frase del texto. Las sucesivas generaciones del mismo documento se acumulan como versiones (`v1`, `v2`…) y la pestaña *Comparar* enfrenta el original con el resultado marcando lo eliminado y lo añadido.
 - **Derecha — Estilo.** Tono, intensidad, longitud, instrucción extra y consumo de intentos con el tiempo que falta para recuperar el tramo.
 
 Atajo: `⌘/Ctrl + Enter` reformula sin salir del área de texto.
