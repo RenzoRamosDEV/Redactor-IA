@@ -44,4 +44,26 @@ async function reformulateText(prompt) {
   return text;
 }
 
-module.exports = { reformulateText };
+/**
+ * Genera el nombre de un documento a partir de su texto.
+ *
+ * Temperatura baja y pocos tokens: aquí no se busca creatividad, sino una
+ * etiqueta corta y estable. La respuesta llega sin limpiar; de eso se encarga
+ * el controller.
+ *
+ * @param {string} prompt - Prompt construido con buildTitlePrompt()
+ * @returns {Promise<string|null>} Título propuesto, o null si no devolvió nada
+ * @throws {Error} Si hay error de red o de la API
+ */
+async function generateTitle(prompt) {
+  const completion = await groq.chat.completions.create({
+    model: 'llama-3.3-70b-versatile',
+    messages: [{ role: 'user', content: prompt }],
+    temperature: 0.3,
+    max_tokens: 32,
+  });
+
+  return completion.choices[0]?.message?.content?.trim() || null;
+}
+
+module.exports = { reformulateText, generateTitle };

@@ -48,7 +48,7 @@ const TECH_PATTERNS = [
  *   return res.status(400).json({ error });
  * }
  */
-function validateInput({ text, tone, intensity, keepLength, extraInstruction }) {
+function validateInput({ text, tone, intensity, keepLength, extraInstruction, needsTitle }) {
   // Validar que el texto exista y sea string
   if (!text || typeof text !== 'string') {
     return 'El campo texto es obligatorio.';
@@ -85,6 +85,11 @@ function validateInput({ text, tone, intensity, keepLength, extraInstruction }) 
   }
   if (extraInstruction && extraInstruction.length > 200) {
     return 'La instrucción extra no puede superar 200 caracteres.';
+  }
+
+  // Validar petición de título (opcional)
+  if (needsTitle !== undefined && typeof needsTitle !== 'boolean') {
+    return 'El campo needsTitle debe ser booleano.';
   }
   
   // Filtrar código/markup - solo lenguaje natural permitido
