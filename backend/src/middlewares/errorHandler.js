@@ -4,7 +4,8 @@
  * Captura errores de toda la aplicación y los convierte en respuestas JSON apropiadas.
  * 
  * Casos especiales manejados:
- * - 429 / Rate Limit de Groq: Mensaje específico al usuario sobre esperar
+ * - 429 / cuota de la IA agotada: mensaje pidiendo esperar
+ * - 502 / 503 / 504: la IA no respondió o tardó demasiado
  * - Otros errores: Respuesta genérica 500 sin exponer detalles internos
  * 
  * Todos los errores se loguean en consola para debugging.
@@ -40,10 +41,18 @@ function errorHandler(err, req, res, next) {
   // Loguear error para debugging
   console.error('[ERROR]', status, msg);
 
-  // Manejar rate limit de Groq (429)
+  // Cuota de la IA agotada (429)
   if (status === 429 || msg.includes('429') || msg.toLowerCase().includes('quota') || msg.toLowerCase().includes('rate limit')) {
-    return res.status(429).json({ 
-      error: 'Se ha superado el límite de uso de la IA. Por favor, espera unos minutos antes de volver a intentarlo.' 
+    return res.status(429).json({
+      error: 'Se ha superado el límite de uso de la IA. Por favor, espera unos minutos antes de volver a intentarlo.'
+    });
+  }
+
+  // La IA no respondió, tardó demasiado o devolvió algo inservible.
+  // Es transitorio, así que conviene decirlo en lugar de dar un error genérico.
+  if (status === 502 || status === 503 || status === 504) {
+    return res.status(503).json({
+      error: 'La IA no está disponible en este momento. Inténtalo de nuevo en unos segundos.',
     });
   }
 
