@@ -9,7 +9,7 @@
  * - Manejo centralizado de errores
  * 
  * Variables de entorno requeridas:
- * - GROQ_API_KEY: Clave de API de Groq
+ * - GEMINI_API_KEY: Clave de API de Google AI Studio
  * - PORT: Puerto del servidor (default: 3001)
  * - FRONTEND_URL (opcional): URL adicional permitida por CORS
  * 
