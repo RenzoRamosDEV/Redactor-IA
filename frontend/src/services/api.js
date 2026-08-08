@@ -29,6 +29,7 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
  * @property {number} intensity - Intensidad del tono (0-100)
  * @property {boolean} keepLength - Mantener longitud similar al original
  * @property {string} [extraInstruction] - Instrucción adicional opcional
+ * @property {boolean} [needsTitle] - Pedir que la IA nombre el documento
  */
 
 /**
@@ -37,6 +38,8 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
  * @property {Object} meta - Metadatos de la operación
  * @property {string} meta.toneApplied - Tono aplicado
  * @property {number} meta.processingTimeMs - Tiempo de procesamiento en ms
+ * @property {string|null} meta.title - Nombre propuesto para el documento
+ *                                      (solo si se pidió con needsTitle)
  * @property {LimitState} limits - Estado actual de límites
  */
 
@@ -86,14 +89,14 @@ export async function getLimits() {
  *   }
  * }
  */
-export async function rewriteText({ text, tone, intensity, keepLength, extraInstruction }) {
+export async function rewriteText({ text, tone, intensity, keepLength, extraInstruction, needsTitle }) {
   let response;
 
   try {
     response = await fetch(`${API_URL}/api/rewrite`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text, tone, intensity, keepLength, extraInstruction }),
+      body: JSON.stringify({ text, tone, intensity, keepLength, extraInstruction, needsTitle }),
     });
   } catch {
     // Servidor caído, sin conexión o CORS: el navegador solo da un

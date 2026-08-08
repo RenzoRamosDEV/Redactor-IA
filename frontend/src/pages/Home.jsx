@@ -93,9 +93,10 @@ export default function Home() {
 
   const isBlocked = limits.blockedBy !== null;
 
-  const title = doc.customTitle
-    ? doc.title
-    : deriveTitle(doc.original, t('document.untitled'));
+  // El nombre lo pone la IA en la primera reformulación y el usuario puede
+  // cambiarlo. Hasta entonces se deriva del propio texto, para no dejar el
+  // documento sin nombre mientras se escribe.
+  const title = doc.title || deriveTitle(doc.original, t('document.untitled'));
 
   const usage = {
     windowUsed: Math.min(
@@ -176,6 +177,9 @@ export default function Home() {
       intensity: doc.intensity,
       keepLength: doc.keepLength,
       extraInstruction: doc.extraInstruction,
+      // Solo en la primera reformulación del documento, y nunca si el usuario
+      // ya le ha puesto nombre a mano.
+      needsTitle: doc.versions.length === 0 && !doc.customTitle,
     };
 
     setIsLoading(true);
@@ -204,6 +208,9 @@ export default function Home() {
 
       setDoc(prev => ({
         ...prev,
+        // Un rename manual siempre gana al nombre propuesto por la IA
+        title:
+          data.meta?.title && !prev.customTitle ? data.meta.title : prev.title,
         versions: [...prev.versions, version],
         updatedAt: Date.now(),
       }));
