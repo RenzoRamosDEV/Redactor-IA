@@ -314,7 +314,6 @@ export default function Home() {
   return (
     <div className={`app${drawerOpen ? ' app--drawer-open' : ''}`}>
       <AppHeader
-        usage={usage}
         drawerOpen={drawerOpen}
         onToggleDrawer={() => setDrawerOpen(open => !open)}
       />

@@ -4,8 +4,6 @@
     "badge": "AI"
   },
   "header": {
-    "window": "15 min slot",
-    "today": "Today",
     "languageLabel": "Language"
   },
   "history": {

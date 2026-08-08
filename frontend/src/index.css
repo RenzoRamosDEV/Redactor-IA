@@ -9,7 +9,9 @@
 :root {
   /* ── Superficies ── */
   --paper: #fbfaf7;
-  --paper-raised: #fdfcfa;
+  /* Las tarjetas se levantan del papel: sin ese contraste, el centro de la
+     pantalla se lee como una sola mancha blanca. */
+  --card: #ffffff;
   --fill: #f2efe8;
   --fill-strong: #f0ede5;
   --fill-hover: #f4f1ea;
@@ -219,7 +221,9 @@ h3 {
   padding: 3px 8px;
 }
 
+/* Solo separa la marca del botón de historial, así que aparece con él */
 .header-rule {
+  display: none;
   width: 1px;
   height: 20px;
   background: var(--line);
@@ -230,33 +234,6 @@ h3 {
   display: flex;
   align-items: center;
   gap: 22px;
-}
-
-.usage-chip {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-}
-
-.usage-chip-label {
-  font-family: var(--mono);
-  font-size: 10px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--ink-faint);
-}
-
-.usage-chip-value {
-  font-family: var(--mono);
-  font-size: 13px;
-}
-
-.usage-chip-total {
-  color: var(--ink-fainter);
-}
-
-.usage-chip--maxed .usage-chip-value {
-  color: var(--warn);
 }
 
 .lang-switch {
@@ -476,7 +453,11 @@ h3 {
 }
 
 .section {
-  margin-bottom: 40px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 22px 26px 24px;
+  margin-bottom: 24px;
 }
 
 .section:last-child {
@@ -770,22 +751,21 @@ h3 {
    Centro · Comparación
    ───────────────────────────────────────────── */
 
+/* Sin marco propio: ya vive dentro de la tarjeta del resultado, y encajar una
+   caja dentro de otra solo añade ruido. Basta el divisor entre columnas. */
 .diff-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  border: 1px solid var(--line);
-  border-radius: 4px;
-  overflow: hidden;
 }
 
 .diff-col {
-  padding: 22px 24px;
+  padding: 0 0 0 26px;
   min-width: 0;
 }
 
 .diff-col--before {
+  padding: 0 26px 0 0;
   border-right: 1px solid var(--line);
-  background: var(--paper-raised);
 }
 
 .diff-col-label {
@@ -1100,7 +1080,8 @@ input[type="range"]::-moz-range-thumb {
     grid-template-columns: minmax(0, 1fr) var(--rail-right);
   }
 
-  .drawer-toggle {
+  .drawer-toggle,
+  .header-rule {
     display: flex;
   }
 
@@ -1155,6 +1136,10 @@ input[type="range"]::-moz-range-thumb {
     padding: 32px 24px 56px;
   }
 
+  .section {
+    padding: 20px 22px 22px;
+  }
+
   .doc-title,
   .doc-title-input {
     font-size: 30px;
@@ -1162,9 +1147,15 @@ input[type="range"]::-moz-range-thumb {
 
   .diff-grid {
     grid-template-columns: minmax(0, 1fr);
+    gap: 24px;
+  }
+
+  .diff-col {
+    padding: 0;
   }
 
   .diff-col--before {
+    padding: 0 0 24px;
     border-right: 0;
     border-bottom: 1px solid var(--line);
   }
@@ -1180,18 +1171,16 @@ input[type="range"]::-moz-range-thumb {
     gap: 12px;
   }
 
-  /* En móvil el header se queda con marca, idioma y acceso al historial */
-  .header-rule,
-  .usage-chip {
-    display: none;
-  }
-
   .header-right {
     gap: 12px;
   }
 
   .editor {
     padding: 26px 18px 48px;
+  }
+
+  .section {
+    padding: 18px 16px 20px;
   }
 
   .doc-title,
