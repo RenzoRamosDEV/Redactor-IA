@@ -229,27 +229,40 @@ export default function Home() {
     }
   }, [canGenerate, doc, t]);
 
+  /**
+   * Vuelca el documento actual antes de dejarlo.
+   *
+   * El guardado normal va con retardo para no escribir en cada tecla, pero al
+   * cambiar de documento ese temporizador se cancela: sin este volcado, quien
+   * genera un texto y pulsa "+ Nuevo" enseguida lo pierde.
+   */
+  const persistCurrent = useCallback(() => {
+    if (doc.versions.length > 0) saveDocument({ ...doc, title });
+  }, [doc, title, saveDocument]);
+
   const handleSelectDocument = useCallback(
     id => {
       const stored = documents.find(d => d.id === id);
       if (!stored) return;
 
+      persistCurrent();
       setDoc(stored);
       setActiveIndex(Math.max(0, stored.versions.length - 1));
       setView('result');
       setError('');
       setDrawerOpen(false);
     },
-    [documents]
+    [documents, persistCurrent]
   );
 
   const handleNewDocument = useCallback(() => {
-    setDoc(current => createDraft(current));
+    persistCurrent();
+    setDoc(createDraft(doc));
     setActiveIndex(0);
     setView('result');
     setError('');
     setDrawerOpen(false);
-  }, []);
+  }, [doc, persistCurrent]);
 
   const handleClear = useCallback(() => {
     updateDoc({ original: '' });
