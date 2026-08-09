@@ -138,6 +138,13 @@ docker compose up -d                                  # arranca el proxy en :400
 curl http://localhost:4000/health/liveliness          # comprobar que responde
 ```
 
+Si usas **Docker Desktop** en Linux, el demonio corre como servicio de usuario
+y no hace falta `sudo`:
+
+```bash
+systemctl --user start docker-desktop
+```
+
 Después, en `backend/.env`, apunta el backend al proxy y usa uno de los alias
 declarados en `litellm_config.yaml` (`rapido`, `equilibrado` o `calidad`):
 
@@ -146,6 +153,11 @@ AI_BASE_URL=http://localhost:4000/v1
 AI_MODEL=equilibrado
 AI_API_KEY=sk-local-redactor-ia
 ```
+
+Con el proxy en marcha, si un modelo agota su cuota diaria LiteLLM reintenta
+con otro de los tres en lugar de devolver un error. Para volver al modo
+directo basta con comentar esas tres líneas y descomentar las de arriba: la
+aplicación deja de depender de Docker.
 
 ### 2. Instalar dependencias
 
