@@ -18,10 +18,6 @@ const TITLE_MAX = 58;
  * @param {string} text - Texto original del documento
  * @param {string} fallback - Nombre a usar si el texto está vacío
  * @returns {string}
- *
- * @example
- * deriveTitle('Os escribo para comentaros que el informe no estará listo. Gracias.', 'Sin título');
- * // 'Os escribo para comentaros que el informe no estará…'
  */
 export function deriveTitle(text, fallback) {
   const clean = (text || '').replace(/\s+/g, ' ').trim();
@@ -45,11 +41,9 @@ export function deriveTitle(text, fallback) {
 }
 
 /**
- * Hora local en formato HH:MM.
- *
- * @param {number} timestamp - Timestamp Unix en ms
+ * @param {number} timestamp
  * @param {string} language - Código de idioma ('es' | 'en')
- * @returns {string}
+ * @returns {string} Hora local en formato HH:MM
  */
 export function formatTime(timestamp, language) {
   return new Intl.DateTimeFormat(language, {

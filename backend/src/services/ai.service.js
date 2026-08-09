@@ -133,9 +133,6 @@ async function complete(prompt, { temperature, maxTokens }) {
  * @param {string} prompt - Prompt construido con buildPrompt()
  * @returns {Promise<string>} Texto reformulado
  * @throws {Error} Si la API falla o no devuelve texto
- *
- * @example
- * const result = await reformulateText(buildPrompt({ text: 'Hola', tone: 'formal', ... }));
  */
 async function reformulateText(prompt) {
   return complete(prompt, { temperature: 0.7, maxTokens: 2048 });
@@ -155,13 +152,4 @@ async function generateTitle(prompt) {
   return complete(prompt, { temperature: 0.3, maxTokens: 256 });
 }
 
-/**
- * Configuración activa, para el arranque y el health check.
- *
- * @returns {{baseUrl: string, model: string}}
- */
-function describeProvider() {
-  return { baseUrl: BASE_URL, model: MODEL };
-}
-
-module.exports = { reformulateText, generateTitle, describeProvider };
+module.exports = { reformulateText, generateTitle };
