@@ -61,6 +61,46 @@ test('descarta el "Sin título" que a veces devuelve el propio modelo', () => {
   assert.strictEqual(cleanTitle('Untitled'), null);
 });
 
+test('descarta los restos del razonamiento del modelo', () => {
+  // Casos vistos de verdad: el modelo se pone a comprobar su propia respuesta
+  // y devuelve el comentario en vez del título.
+  assert.strictEqual(cleanTitle(' 5 words) - Good.'), null);
+  assert.strictEqual(cleanTitle('Cambio de reunión (5 palabras)'), null);
+  assert.strictEqual(cleanTitle('Aviso de retraso - Good'), null);
+  assert.strictEqual(cleanTitle(') texto suelto'), null);
+});
+
+test('descarta fragmentos con paréntesis descuadrados', () => {
+  assert.strictEqual(cleanTitle('reunión) del martes'), null);
+  assert.strictEqual(cleanTitle('Aviso (sin cerrar'), null);
+  assert.strictEqual(cleanTitle('Aviso [sin cerrar'), null);
+});
+
+test('no confunde un título legítimo con un resto', () => {
+  assert.strictEqual(cleanTitle('Informe Q2 (borrador)'), 'Informe Q2 (borrador)');
+  assert.strictEqual(cleanTitle('Reunión de buenas prácticas'), 'Reunión de buenas prácticas');
+});
+
+test('quita las palabras con las que el título queda colgando', () => {
+  // El modelo corta al llegar a su límite de palabras y deja preposiciones
+  // sueltas al final.
+  assert.strictEqual(
+    cleanTitle('Retraso en el envío del resumen de'),
+    'Retraso en el envío del resumen'
+  );
+  assert.strictEqual(cleanTitle('Paseo al centro con'), 'Paseo al centro');
+  assert.strictEqual(cleanTitle('Notes about the meeting of the'), 'Notes about the meeting');
+});
+
+test('no recorta un título que acaba bien', () => {
+  assert.strictEqual(cleanTitle('Cambio de fecha'), 'Cambio de fecha');
+  assert.strictEqual(cleanTitle('Retraso del informe trimestral'), 'Retraso del informe trimestral');
+});
+
+test('prefiere un título corto colgando antes que dejarlo en nada', () => {
+  assert.strictEqual(cleanTitle('Paseo con'), 'Paseo con');
+});
+
 test('descarta títulos con pinta de código', () => {
   assert.strictEqual(cleanTitle('```texto```'), null);
   assert.strictEqual(cleanTitle('<script>algo</script>'), null);

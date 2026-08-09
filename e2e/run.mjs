@@ -209,7 +209,17 @@ try {
   comprobar('⌘/Ctrl + Enter reformula', v1.length > 0);
   comprobar('el resultado difiere del original', v1 !== TEXTO);
   comprobar('la primera reformulación pide título', peticiones[0]?.needsTitle === true);
-  comprobar('la IA nombra el documento', (await titulo()) !== 'Sin título', await titulo());
+  const nombre = await titulo();
+  comprobar('la IA nombra el documento', nombre !== 'Sin título', nombre);
+  // Sin esto, un resto del razonamiento del modelo (" 5 words) - Good.")
+  // pasaría por bueno con solo no ser "Sin título".
+  comprobar(
+    'el nombre parece un título de verdad',
+    nombre.length >= 3 &&
+      !/[)\]]/.test(nombre.replace(/\([^)]*\)/g, '')) &&
+      !/\b\d+\s*(words?|palabras?)\b/i.test(nombre),
+    nombre
+  );
 
   // ── Copiar ──────────────────────────────────────────────────────────
   await page.getByRole('button', { name: 'Copiar' }).click();
@@ -227,7 +237,12 @@ try {
   comprobar('el nombre no cambia con la segunda variante', (await titulo()) === nombreTrasPrimera);
 
   const v2 = (await resultado()).trim();
-  comprobar('la variante es otro texto', v2 !== v1);
+  comprobar('se guarda una segunda versión', (await page.locator('.version-pill').count()) === 2);
+
+  // Que el texto sea distinto no depende de la aplicación: con el mismo
+  // original y los mismos ajustes, el modelo puede repetirse. Se informa sin
+  // dar la prueba por fallida.
+  if (v2 === v1) console.log('   nota  el modelo devolvió el mismo texto en la segunda variante');
 
   await page.getByRole('button', { name: 'v1', exact: true }).click();
   await page.waitForTimeout(300);
