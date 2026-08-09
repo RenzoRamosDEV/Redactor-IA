@@ -43,7 +43,9 @@ Tipografías: **Public Sans** (interfaz), **Newsreader** (texto redactado) y **J
 | Tecnología | Uso |
 |---|---|
 | **Node.js + Express 5** | Servidor HTTP y API REST |
-| **API de Gemini** | Modelo de IA que reformula el texto y nombra el documento |
+| **API compatible con OpenAI** | Interfaz única con la IA: el modelo se elige en el `.env` |
+| **Gemini** | Proveedor por defecto (reformula el texto y nombra el documento) |
+| **LiteLLM** | Proxy opcional para repartir entre varios modelos o proveedores |
 | **Helmet** | Headers de seguridad HTTP |
 | **CORS** | Control de acceso entre origen frontend y backend |
 | **express-rate-limit** | Límite de uso por IP (8 intentos/15min, 40/día) |
@@ -70,7 +72,7 @@ redactor-ia/
     └── src/
         ├── routes/        # POST /api/rewrite, GET /api/limits
         ├── controllers/   # Lógica de las rutas
-        ├── services/      # Integración con la API de Gemini
+        ├── services/      # Cliente de IA (cualquier API compatible con OpenAI)
         ├── middlewares/   # Rate limiting, manejo de errores
         └── utils/         # Construcción del prompt
 ```
@@ -93,16 +95,57 @@ Atajo: `⌘/Ctrl + Enter` reformula sin salir del área de texto.
 
 Crea un archivo `.env` en la carpeta `backend/`:
 
-```env
-GEMINI_API_KEY=tu_api_key_de_google_ai_studio
-PORT=3001
-# Opcional: modelo a usar (por defecto gemini-3.6-flash)
-GEMINI_MODEL=gemini-3.6-flash
-# Opcional: URL del frontend en producción
-FRONTEND_URL=https://tu-dominio.com
+Copia `backend/.env.example` a `backend/.env` y rellena la clave:
+
+```bash
+cp backend/.env.example backend/.env
 ```
 
 Obtén tu API key gratis en: https://aistudio.google.com/apikey
+
+### Cambiar de modelo de IA
+
+El backend no habla con ningún proveedor en concreto: usa el formato de la API
+de OpenAI y toma del `.env` a dónde apunta, con qué clave y con qué modelo.
+**Cambiar de modelo es editar una línea y reiniciar; no se toca código.**
+
+```env
+AI_BASE_URL=https://generativelanguage.googleapis.com/v1beta/openai
+AI_MODEL=gemini-3.5-flash
+```
+
+Los tres modelos preparados, de más rápido a más capaz:
+
+| `AI_MODEL` | Cuándo usarlo |
+|---|---|
+| `gemini-flash-lite-latest` | Prima la latencia |
+| `gemini-3.5-flash` | Equilibrado (por defecto) |
+| `gemini-3.6-flash` | Prima la calidad |
+
+`AI_REASONING_EFFORT` controla cuánto puede razonar el modelo antes de
+responder. Conviene dejarlo en `low`: con valores altos, el razonamiento se
+come el presupuesto de tokens y las respuestas llegan cortadas a media frase.
+
+### Varios modelos a la vez, con LiteLLM (opcional)
+
+El plan gratuito de Gemini da **20 peticiones al día y por modelo**, muy por
+debajo de los límites que anuncia la aplicación. LiteLLM levanta un proxy que
+reparte entre los tres modelos y reintenta con otro cuando uno agota su cuota,
+además de permitir mezclar proveedores distintos.
+
+```bash
+docker compose up -d                                  # arranca el proxy en :4000
+curl http://localhost:4000/health/liveliness          # comprobar que responde
+```
+
+Después, en `backend/.env`, apunta el backend al proxy y usa uno de los alias
+declarados en `litellm_config.yaml` (`rapido`, `equilibrado` o `calidad`):
+
+```env
+AI_BASE_URL=http://localhost:4000/v1
+AI_MODEL=equilibrado
+AI_API_KEY=sk-local-redactor-ia
+```
 
 ### 2. Instalar dependencias
 

@@ -1,0 +1,44 @@
+# Configuración del proxy LiteLLM.
+#
+# Declara los modelos disponibles y les pone un alias. El backend solo envía
+# el alias (variable AI_MODEL del .env), así que cambiar de modelo —o de
+# proveedor— no toca ni una línea de código.
+#
+# Arranque:  docker compose up -d
+# Comprobar: curl http://localhost:4000/health/liveliness
+
+model_list:
+  # Alias "rapido": el más ligero, para cuando prima la latencia
+  - model_name: rapido
+    litellm_params:
+      model: gemini/gemini-flash-lite-latest
+      api_key: os.environ/GEMINI_API_KEY
+      # Los modelos que razonan gastan ese razonamiento del mismo presupuesto
+      # de tokens que la respuesta: sin bajarlo, los títulos salen vacíos y las
+      # reformulaciones cortadas a media frase.
+      reasoning_effort: low
+
+  # Alias "equilibrado": el que usa la aplicación por defecto
+  - model_name: equilibrado
+    litellm_params:
+      model: gemini/gemini-3.5-flash
+      api_key: os.environ/GEMINI_API_KEY
+      reasoning_effort: low
+
+  # Alias "calidad": el más capaz de los tres
+  - model_name: calidad
+    litellm_params:
+      model: gemini/gemini-3.6-flash
+      api_key: os.environ/GEMINI_API_KEY
+      reasoning_effort: low
+
+litellm_settings:
+  # El plan gratuito de Gemini da 20 peticiones al día POR MODELO. Como cada
+  # alias apunta a un modelo distinto, al agotarse uno el proxy reintenta con
+  # los otros en lugar de devolver un 429 al usuario.
+  fallbacks:
+    - rapido: ["equilibrado", "calidad"]
+    - equilibrado: ["calidad", "rapido"]
+    - calidad: ["equilibrado", "rapido"]
+  num_retries: 1
+  request_timeout: 30

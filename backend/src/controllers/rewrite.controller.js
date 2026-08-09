@@ -4,7 +4,7 @@
  * Flujo de trabajo:
  * 1. Validar entrada (texto, tono, intensidad, etc.)
  * 2. Construir prompt cerrado para la IA
- * 3. Llamar al servicio de Gemini para generar texto
+ * 3. Llamar al servicio de IA para generar texto
  * 4. Validar salida (sin código, formato correcto)
  * 5. Responder con resultado, metadata y estado de límites
  * 
@@ -17,7 +17,7 @@ const { validateInput } = require('../utils/inputValidator');
 const { validateOutput } = require('../utils/outputValidator');
 const { buildPrompt, buildTitlePrompt } = require('../utils/promptBuilder');
 const { cleanTitle } = require('../utils/titleFormatter');
-const { reformulateText, generateTitle } = require('../services/gemini.service');
+const { reformulateText, generateTitle } = require('../services/ai.service');
 
 /**
  * Propone un nombre para el documento a partir del texto original.
@@ -87,7 +87,7 @@ async function rewrite(req, res, next) {
     const prompt = buildPrompt({ text, tone, intensity, keepLength, extraInstruction });
     const startTime = Date.now();
 
-    // Llamar a la API de Gemini para generar texto
+    // Llamar a la IA para generar texto
     const result = await reformulateText(prompt);
     const processingTimeMs = Date.now() - startTime;
 
