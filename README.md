@@ -173,6 +173,34 @@ pkill -f "node.*server.js" && pkill -f "vite"
 
 ---
 
+## Pruebas
+
+```bash
+npm test --prefix backend     # lógica del backend (37 pruebas)
+npm test --prefix frontend    # utilidades del frontend (18 pruebas)
+node e2e/run.mjs              # de principio a fin, en un navegador real
+```
+
+Las dos primeras usan el runner que trae Node, sin dependencias añadidas, y
+cubren lo que más fácil se rompe en silencio: la validación de entrada, la
+limpieza del título que devuelve la IA, la traducción de errores del proveedor
+y la comparación palabra a palabra.
+
+La prueba de principio a fin arranca el backend y el frontend en puertos
+propios, abre un navegador y recorre el flujo completo: escribir, reformular
+con atajo de teclado, copiar, generar variantes, comparar, renombrar,
+historial, persistencia al recargar, límite de caracteres, los dos idiomas,
+límite agotado, caída de red y el cajón del historial en móvil.
+
+```bash
+node e2e/run.mjs --sin-ia     # sin gastar cuota: simula las respuestas de la IA
+```
+
+Necesita un Chromium; lo busca en el caché de Playwright, en el sistema o en
+la variable `CHROME_PATH`.
+
+---
+
 ## Limites de uso
 
 Para evitar abuso de la API de IA, el backend aplica rate limiting por IP:

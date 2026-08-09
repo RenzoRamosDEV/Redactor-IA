@@ -27,21 +27,21 @@ export function deriveTitle(text, fallback) {
   const clean = (text || '').replace(/\s+/g, ' ').trim();
   if (!clean) return fallback;
 
-  // Primera frase completa, si termina antes del límite
-  const sentence = clean.match(/^(.{1,58}?)(?:[.!?…]|$)/);
-  let title = sentence ? sentence[1].trim() : clean;
+  // Una primera frase completa que quepa entera es el mejor nombre posible, y
+  // va sin puntos suspensivos aunque el texto siga: no se ha cortado nada.
+  // Se exige espacio o final tras el punto para no partir por un decimal.
+  const sentence = clean.match(/^(.{1,58}?)[.!?…](?:\s|$)/);
+  if (sentence) return sentence[1].trim();
 
-  if (title.length > TITLE_MAX) {
-    title = title.slice(0, TITLE_MAX);
-  }
+  if (clean.length <= TITLE_MAX) return clean;
 
-  if (title.length < clean.length) {
-    const lastSpace = title.lastIndexOf(' ');
-    if (lastSpace > 24) title = title.slice(0, lastSpace);
-    title = `${title.replace(/[,;:]$/, '')}…`;
-  }
+  // Sin frase que aprovechar: se corta por la última palabra que cabe y se
+  // avisa con puntos suspensivos de que hay más texto.
+  const cut = clean.slice(0, TITLE_MAX);
+  const lastSpace = cut.lastIndexOf(' ');
+  const base = lastSpace > 24 ? cut.slice(0, lastSpace) : cut;
 
-  return title;
+  return `${base.replace(/[,;:]$/, '')}…`;
 }
 
 /**
