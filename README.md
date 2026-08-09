@@ -166,6 +166,13 @@ npm install --prefix backend
 npm install --prefix frontend
 ```
 
+El frontend apunta a `http://localhost:3001` por defecto. Para señalar a otro
+backend (por ejemplo en producción), define `VITE_API_URL` al construir:
+
+```bash
+VITE_API_URL=https://api.tu-dominio.com npm run build --prefix frontend
+```
+
 ### 3. Levantar el proyecto
 
 ```bash

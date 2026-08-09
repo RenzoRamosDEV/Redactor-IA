@@ -59,8 +59,14 @@ function cleanTitle(raw) {
   // Solo la primera línea: si el modelo se explaya, el resto sobra
   let title = raw.split('\n')[0].trim();
 
+  // Adornos con los que el modelo envuelve el título pese a pedírselo sin
+  // ellos: comillas y, sobre todo, marcas de markdown (**negrita**, ## …).
+  const desnudar = t =>
+    t.replace(/^[*_#\s"'«»“”¿¡]+/, '').replace(/[*_#\s"'«»“”.,;:]+$/, '');
+
+  title = desnudar(title);
   title = title.replace(/^(t[íi]tulo|title)\s*:\s*/i, '');
-  title = title.replace(/^["'«»“”¿¡]+|["'«»“”.,;:]+$/g, '');
+  title = desnudar(title);
   title = title.replace(/\s+/g, ' ').trim();
 
   if (title.length < MIN_LENGTH) return null;
