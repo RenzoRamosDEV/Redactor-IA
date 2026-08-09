@@ -1,23 +1,12 @@
 /**
- * Constructor de prompts cerrados para la IA
- * 
- * Genera prompts estructurados con reglas estrictas para prevenir:
- * - Responder preguntas fuera del scope de reformulación
- * - Generar código, SQL, HTML u otros formatos técnicos
- * - Ejecutar instrucciones inyectadas en el texto del usuario
- * 
- * El prompt incluye:
- * - Instrucciones de sistema cerrado
- * - Tono solicitado con descripción clara
- * - Nivel de intensidad (0-100)
- * - Preferencia de longitud (mantener o permitir variación)
- * - Instrucción adicional del usuario (opcional, max 200 chars)
- * - Texto original a reformular
- * 
+ * Construcción de los prompts que se envían a la IA.
+ *
+ * Van cerrados a propósito: acotan lo que puede hacer el modelo para que no
+ * responda preguntas ni genere código aunque el texto del usuario se lo pida.
+ *
  * @module utils/promptBuilder
  */
 
-// Mapeo de tonos a instrucciones claras para la IA
 const TONE_LABELS = {
   rewrite: 'Mejora la redacción del texto manteniendo el significado original.',
   formal: 'Reformula el texto con un tono formal y profesional.',
@@ -30,42 +19,21 @@ const TONE_LABELS = {
 };
 
 /**
- * Construye un prompt cerrado para reformular texto con la IA.
- * 
- * @param {Object} params - Parámetros de reformulación
- * @param {string} params.text - Texto original a reformular
- * @param {string} params.tone - Tono deseado (rewrite, formal, fun, etc.)
- * @param {number} params.intensity - Intensidad del tono (0-100)
- * @param {boolean} params.keepLength - Si mantener longitud similar
- * @param {string} [params.extraInstruction] - Instrucción adicional del usuario (opcional)
- * 
- * @returns {string} Prompt completo para enviar a la IA
- * 
- * @example
- * const prompt = buildPrompt({
- *   text: 'Hola, qué tal?',
- *   tone: 'formal',
- *   intensity: 70,
- *   keepLength: true,
- *   extraInstruction: 'Mantén un tono cercano'
- * });
- * // Devuelve un prompt estructurado con reglas + instrucciones + texto
+ * @param {Object} params - text, tone, intensity, keepLength y, opcional,
+ *   extraInstruction
+ * @returns {string} Prompt completo
  */
 function buildPrompt({ text, tone, intensity, keepLength, extraInstruction }) {
-  // Seleccionar instrucción de tono (con fallback)
   const toneInstruction = TONE_LABELS[tone] || TONE_LABELS.rewrite;
   
-  // Construir instrucción de longitud
   const keepLengthInstruction = keepLength
     ? 'Mantén una longitud similar al texto original.'
     : 'La longitud puede variar.';
   
-  // Agregar instrucción extra del usuario si existe
   const extraLine = extraInstruction
     ? `Instrucción adicional: ${extraInstruction}`
     : '';
 
-  // Construir prompt cerrado con reglas estrictas
   return `Eres un sistema cerrado especializado únicamente en reformular texto redactado en lenguaje natural.
 
 Reglas estrictas:
@@ -91,11 +59,7 @@ ${text}`;
  * sustituir el "Sin título" del editor.
  *
  * @param {string} text - Texto original escrito por el usuario
- * @returns {string} Prompt completo para enviar a la IA
- *
- * @example
- * buildTitlePrompt('Os escribo para comentaros que el informe no estará listo...');
- * // La IA responde algo como: "Retraso del informe trimestral"
+ * @returns {string} Prompt completo
  */
 function buildTitlePrompt(text) {
   return `Eres un sistema cerrado que solo pone nombre a documentos de texto.

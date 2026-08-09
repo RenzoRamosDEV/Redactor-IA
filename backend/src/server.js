@@ -1,18 +1,8 @@
 /**
- * Servidor Express principal para el Redactor IA
- * 
- * Configura y arranca un servidor HTTP con:
- * - Seguridad básica (Helmet)
- * - CORS dinámico para localhost en cualquier puerto
- * - Rate limiting dual (ventana + diario)
- * - Rutas API para reformulación de texto
- * - Manejo centralizado de errores
- * 
- * Variables de entorno requeridas:
- * - GEMINI_API_KEY: Clave de API de Google AI Studio
- * - PORT: Puerto del servidor (default: 3001)
- * - FRONTEND_URL (opcional): URL adicional permitida por CORS
- * 
+ * Servidor Express del Redactor IA.
+ *
+ * Variables de entorno: ver backend/.env.example.
+ *
  * @module server
  */
 
@@ -26,18 +16,14 @@ const rewriteRoutes = require('./routes/rewrite.routes');
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// ──────────────────────────────────────────────────────────────
-// Middlewares de seguridad
-// ──────────────────────────────────────────────────────────────
-
 app.use(helmet());
 app.use(cors({
   origin: (origin, callback) => {
-    // Permitir requests sin origin (curl, Postman) y cualquier puerto localhost
+    // Sin origin son curl o Postman; localhost en cualquier puerto cubre los
+    // arranques de Vite, que cambia de puerto cuando el suyo está ocupado.
     if (!origin || /^http:\/\/localhost:\d+$/.test(origin)) {
       return callback(null, true);
     }
-    // Permitir FRONTEND_URL explícito si está configurado
     const allowed = process.env.FRONTEND_URL;
     if (allowed && origin === allowed) return callback(null, true);
     callback(new Error(`CORS blocked: ${origin}`));
@@ -45,33 +31,12 @@ app.use(cors({
   methods: ['GET', 'POST'],
 }));
 
-// ──────────────────────────────────────────────────────────────
-// Body parsing (límite 10kb para prevenir payloads grandes)
-// ──────────────────────────────────────────────────────────────
-
+// El texto va topado a 500 caracteres, así que 10kb sobran de largo
 app.use(express.json({ limit: '10kb' }));
 
-// ──────────────────────────────────────────────────────────────
-// Rutas de la API
-// ──────────────────────────────────────────────────────────────
-
 app.use('/api', rewriteRoutes);
-
-// ──────────────────────────────────────────────────────────────
-// Health check
-// ──────────────────────────────────────────────────────────────
-
 app.get('/health', (req, res) => res.json({ status: 'ok' }));
-
-// ──────────────────────────────────────────────────────────────
-// Manejo centralizado de errores
-// ──────────────────────────────────────────────────────────────
-
 app.use(errorHandler);
-
-// ──────────────────────────────────────────────────────────────
-// Inicio del servidor
-// ──────────────────────────────────────────────────────────────
 
 app.listen(PORT, () => {
   console.log(`[server] Running on port ${PORT}`);

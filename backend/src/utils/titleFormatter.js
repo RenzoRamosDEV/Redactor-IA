@@ -52,10 +52,6 @@ const LEAKED_REASONING = [
  *
  * @param {string|null} raw - Respuesta cruda del modelo
  * @returns {string|null} Título limpio, o null si no sirve
- *
- * @example
- * cleanTitle('Título: "Retraso del informe trimestral."');
- * // 'Retraso del informe trimestral'
  */
 function cleanTitle(raw) {
   if (!raw || typeof raw !== 'string') return null;
@@ -92,9 +88,6 @@ function cleanTitle(raw) {
  *
  * @param {string} title
  * @returns {string}
- *
- * @example
- * dropTrailingWords('Retraso en el envío del resumen de'); // 'Retraso en el envío del resumen'
  */
 function dropTrailingWords(title) {
   let words = title.split(' ');

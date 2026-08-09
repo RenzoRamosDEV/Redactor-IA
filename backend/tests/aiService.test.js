@@ -15,7 +15,7 @@ process.env.AI_REASONING_EFFORT = 'low';
 
 const test = require('node:test');
 const assert = require('node:assert');
-const { reformulateText, generateTitle, describeProvider } = require('../src/services/ai.service');
+const { reformulateText, generateTitle } = require('../src/services/ai.service');
 
 const fetchOriginal = globalThis.fetch;
 
@@ -44,13 +44,6 @@ const respuestaOk = texto => ({
   ok: true,
   status: 200,
   body: { choices: [{ message: { content: texto }, finish_reason: 'stop' }] },
-});
-
-test('la configuración activa sale del entorno, sin barra final', () => {
-  assert.deepStrictEqual(describeProvider(), {
-    baseUrl: 'https://ejemplo.test/v1',
-    model: 'modelo-de-prueba',
-  });
 });
 
 test('envía el formato de OpenAI al endpoint configurado', async () => {

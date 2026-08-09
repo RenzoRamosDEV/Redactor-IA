@@ -19,10 +19,6 @@ import { useCallback, useSyncExternalStore } from 'react';
  *
  * @param {number|null} targetMs - Timestamp Unix (ms) objetivo
  * @returns {number|null} Milisegundos restantes, o null
- *
- * @example
- * const remaining = useCountdown(limits.windowResetAt);
- * if (remaining) console.log(toMinutes(remaining)); // 4
  */
 export function useCountdown(targetMs) {
   const subscribe = useCallback(
@@ -51,22 +47,12 @@ export function useCountdown(targetMs) {
   return useSyncExternalStore(subscribe, getRemaining, getRemaining);
 }
 
-/**
- * Minutos restantes redondeados hacia arriba, con mínimo 1.
- *
- * @param {number} ms - Milisegundos restantes
- * @returns {number}
- */
+/** @param {number} ms @returns {number} Minutos restantes, mínimo 1 */
 export function toMinutes(ms) {
   return Math.max(1, Math.ceil(ms / 60000));
 }
 
-/**
- * Segundos restantes redondeados hacia arriba, con mínimo 1.
- *
- * @param {number} ms - Milisegundos restantes
- * @returns {number}
- */
+/** @param {number} ms @returns {number} Segundos restantes, mínimo 1 */
 export function toSeconds(ms) {
   return Math.max(1, Math.ceil(ms / 1000));
 }
