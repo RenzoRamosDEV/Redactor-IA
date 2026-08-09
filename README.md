@@ -1,231 +1,177 @@
 # Redactor IA
 
-Herramienta web para reformular y mejorar textos usando inteligencia artificial. El usuario pega su texto, elige el tono deseado y recibe una versión reescrita por un modelo LLM en segundos.
+Aplicación web para reformular textos con inteligencia artificial. Pegas un texto, eliges el tono y recibes una versión reescrita, con la posibilidad de comparar ambas palabra por palabra y de guardar cada documento en un historial.
+
+![La aplicación](docs/preview.png)
 
 ---
 
-## Preview
+## Qué hace
 
-![Vista de resultado](docs/preview-resultado.png)
-
----
-
-## Para qué sirve
-
-- **Mejorar la redacción** de textos escritos rápido o con errores de estilo
-- **Cambiar el tono** de un mensaje: más formal, casual, profesional, directo, persuasivo, divertido o creativo
-- **Ajustar la intensidad** del cambio (desde leve retoque hasta reescritura total)
-- **Mantener o liberar la longitud** del texto original según necesidad
-- **Agregar instrucciones extra** para personalizar el resultado
-- **Nombrar el documento automáticamente** a partir del texto, con la propia IA
-- **Generar varias variantes** del mismo texto y alternar entre ellas
-- **Comparar** el original y el resultado palabra por palabra
-- **Recuperar textos anteriores** desde el historial (guardado en el navegador)
-
----
-
-## Tecnologías
-
-### Frontend
-
-| Tecnología | Uso |
-|---|---|
-| **React 19** | Framework UI principal |
-| **Vite** | Bundler y servidor de desarrollo |
-| **CSS propio** | Sistema de diseño con custom properties (sin framework de utilidades) |
-| **i18next** | Internacionalización (español / inglés) |
-| **localStorage** | Historial de documentos, sin backend de persistencia |
-
-Tipografías: **Public Sans** (interfaz), **Newsreader** (texto redactado) y **JetBrains Mono** (metadatos y contadores).
-
-### Backend
-
-| Tecnología | Uso |
-|---|---|
-| **Node.js + Express 5** | Servidor HTTP y API REST |
-| **API compatible con OpenAI** | Interfaz única con la IA: el modelo se elige en el `.env` |
-| **Gemini** | Proveedor por defecto (reformula el texto y nombra el documento) |
-| **LiteLLM** | Proxy opcional para repartir entre varios modelos o proveedores |
-| **Helmet** | Headers de seguridad HTTP |
-| **CORS** | Control de acceso entre origen frontend y backend |
-| **express-rate-limit** | Límite de uso por IP (8 intentos/15min, 40/día) |
-| **dotenv** | Gestión de variables de entorno |
-
----
-
-## Arquitectura
-
-```
-redactor-ia/
-├── frontend/          # App React (Vite)
-│   └── src/
-│       ├── components/    # AppHeader, HistoryRail, DocumentHeader,
-│       │                  # SourceSection, ResultSection, DiffView, StyleRail
-│       ├── pages/         # Home.jsx (estado del documento en edición)
-│       ├── hooks/         # useDocuments (historial), useCountdown (reinicio del tramo)
-│       ├── utils/         # diffWords (comparación), documents (títulos y agrupación)
-│       ├── services/      # Llamadas a la API del backend
-│       ├── locales/       # Traducciones es.json / en.json
-│       ├── constants/     # Tonos, límites, valores por defecto
-│       └── index.css      # Tokens de diseño y estilos de toda la interfaz
-└── backend/           # API Express (Node.js)
-    └── src/
-        ├── routes/        # POST /api/rewrite, GET /api/limits
-        ├── controllers/   # Lógica de las rutas
-        ├── services/      # Cliente de IA (cualquier API compatible con OpenAI)
-        ├── middlewares/   # Rate limiting, manejo de errores
-        └── utils/         # Construcción del prompt
-```
+- **Reformula** el texto en ocho tonos: mejor redacción, formal, divertido, casual, profesional, directo, persuasivo y creativo.
+- **Gradúa el cambio** con un control de intensidad, y puede **limitar la longitud** para que el texto no crezca.
+- **Acepta una instrucción libre** («más cercano, sin tecnicismos…») que se suma al tono.
+- **Nombra el documento** con la propia IA, una sola vez por documento, y el nombre se puede cambiar a mano.
+- **Acumula variantes** del mismo texto (`v1`, `v2`…) para poder volver a cualquiera.
+- **Compara** el original y el resultado marcando lo eliminado y lo añadido.
+- **Guarda un historial** por días, en el navegador, con los 40 documentos más recientes.
+- **Habla español e inglés**, y se adapta de escritorio a móvil.
 
 ### Cómo se organiza la interfaz
 
-La pantalla es un único espacio de trabajo de tres columnas:
+Un espacio de trabajo de tres columnas:
 
-- **Izquierda — Historial.** Cada texto reformulado se guarda como documento, agrupado por día. Solo se guardan los que tienen al menos un resultado, y se conservan los 40 más recientes. Por debajo de 1280 px pasa a ser un cajón lateral.
-- **Centro — Documento.** Título, texto original con contador de caracteres y el resultado. El nombre lo propone la IA en la primera reformulación de cada documento —una sola vez, no en las siguientes variantes— y siempre se puede cambiar a mano. Mientras se escribe, antes de esa primera llamada, se deriva de la primera frase del texto. Las sucesivas generaciones del mismo documento se acumulan como versiones (`v1`, `v2`…) y la pestaña *Comparar* enfrenta el original con el resultado marcando lo eliminado y lo añadido.
-- **Derecha — Estilo.** Tono, intensidad, longitud, instrucción extra y consumo de intentos con el tiempo que falta para recuperar el tramo.
+- **Izquierda.** Consumo de intentos con el tiempo que falta para recuperarlos, y debajo el historial agrupado por día. Solo se guardan los documentos que tienen algún resultado. Por debajo de 1280 px pasa a ser un cajón lateral.
+- **Centro.** El documento: su nombre, el texto original con contador de caracteres y el resultado. Mientras se escribe, el nombre se deriva de la primera frase; en la primera reformulación lo sustituye el que propone la IA. Las siguientes generaciones se acumulan como versiones, y la pestaña *Comparar* enfrenta original y resultado.
+- **Derecha.** Tono, intensidad, longitud e instrucción extra.
 
 Atajo: `⌘/Ctrl + Enter` reformula sin salir del área de texto.
 
 ---
 
-## Configuración y arranque
+## Puesta en marcha
 
-### 1. Variables de entorno
-
-Crea un archivo `.env` en la carpeta `backend/`:
-
-Copia `backend/.env.example` a `backend/.env` y rellena la clave:
+Necesitas **Node.js 20 o superior** y una clave de [Google AI Studio](https://aistudio.google.com/apikey), que es gratuita.
 
 ```bash
-cp backend/.env.example backend/.env
-```
-
-Obtén tu API key gratis en: https://aistudio.google.com/apikey
-
-### Cambiar de modelo de IA
-
-El backend no habla con ningún proveedor en concreto: usa el formato de la API
-de OpenAI y toma del `.env` a dónde apunta, con qué clave y con qué modelo.
-**Cambiar de modelo es editar una línea y reiniciar; no se toca código.**
-
-```env
-AI_BASE_URL=https://generativelanguage.googleapis.com/v1beta/openai
-AI_MODEL=gemini-3.5-flash
-```
-
-Los tres modelos preparados, de más rápido a más capaz:
-
-| `AI_MODEL` | Cuándo usarlo |
-|---|---|
-| `gemini-flash-lite-latest` | Prima la latencia |
-| `gemini-3.5-flash` | Equilibrado (por defecto) |
-| `gemini-3.6-flash` | Prima la calidad |
-
-`AI_REASONING_EFFORT` controla cuánto puede razonar el modelo antes de
-responder. Conviene dejarlo en `low`: con valores altos, el razonamiento se
-come el presupuesto de tokens y las respuestas llegan cortadas a media frase.
-
-### Varios modelos a la vez, con LiteLLM (opcional)
-
-El plan gratuito de Gemini da **20 peticiones al día y por modelo**, muy por
-debajo de los límites que anuncia la aplicación. LiteLLM levanta un proxy que
-reparte entre los tres modelos y reintenta con otro cuando uno agota su cuota,
-además de permitir mezclar proveedores distintos.
-
-```bash
-docker compose up -d                                  # arranca el proxy en :4000
-curl http://localhost:4000/health/liveliness          # comprobar que responde
-```
-
-Si usas **Docker Desktop** en Linux, el demonio corre como servicio de usuario
-y no hace falta `sudo`:
-
-```bash
-systemctl --user start docker-desktop
-```
-
-Después, en `backend/.env`, apunta el backend al proxy y usa uno de los alias
-declarados en `litellm_config.yaml` (`rapido`, `equilibrado` o `calidad`):
-
-```env
-AI_BASE_URL=http://localhost:4000/v1
-AI_MODEL=equilibrado
-AI_API_KEY=sk-local-redactor-ia
-```
-
-Con el proxy en marcha, si un modelo agota su cuota diaria LiteLLM reintenta
-con otro de los tres en lugar de devolver un error. Para volver al modo
-directo basta con comentar esas tres líneas y descomentar las de arriba: la
-aplicación deja de depender de Docker.
-
-### 2. Instalar dependencias
-
-```bash
+# 1. Dependencias
 npm install --prefix backend
 npm install --prefix frontend
+
+# 2. Configuración
+cp backend/.env.example backend/.env    # y rellena GEMINI_API_KEY
+
+# 3. Arrancar
+node backend/src/server.js & npm run dev --prefix frontend
 ```
 
-El frontend apunta a `http://localhost:3001` por defecto. Para señalar a otro
-backend (por ejemplo en producción), define `VITE_API_URL` al construir:
+La aplicación queda en **http://localhost:5173/redactor-ia/** — con la barra final: `/redactor-ia/` es la ruta base configurada en Vite, y sin ella Vite devuelve un 404.
+
+Para parar:
+
+```bash
+pkill -f "node.*server.js" && pkill -f vite
+```
+
+El frontend llama a `http://localhost:3001` salvo que se le diga otra cosa. Para apuntar a otro backend al construir:
 
 ```bash
 VITE_API_URL=https://api.tu-dominio.com npm run build --prefix frontend
 ```
 
-### 3. Levantar el proyecto
+---
 
-```bash
-# Desde la raíz del proyecto
-node backend/src/server.js & npm run dev --prefix frontend
+## Elegir el modelo de IA
+
+El backend no está atado a ningún proveedor: habla el formato `/chat/completions` de OpenAI y toma del `.env` a dónde apunta, con qué clave y con qué modelo. **Cambiar de modelo es editar una línea y reiniciar.**
+
+```env
+AI_BASE_URL=https://generativelanguage.googleapis.com/v1beta/openai
+AI_MODEL=gemini-3.5-flash
+AI_REASONING_EFFORT=low
 ```
 
-- Frontend: http://localhost:5173/redactor-ia/
-- Backend: http://localhost:3001
-- Health check: http://localhost:3001/health
+Los tres modelos preparados:
 
-### 4. Parar los servicios
+| `AI_MODEL` | Cuándo |
+|---|---|
+| `gemini-flash-lite-latest` | Prima la velocidad |
+| `gemini-3.5-flash` | Equilibrado (por defecto) |
+| `gemini-3.6-flash` | Prima la calidad |
+
+`AI_REASONING_EFFORT` limita cuánto razona el modelo antes de responder. Conviene dejarlo en `low`: ese razonamiento consume el mismo presupuesto de tokens que la respuesta, y con valores altos los títulos llegan vacíos y las reformulaciones cortadas a media frase.
+
+### Varios modelos a la vez, con LiteLLM (opcional)
+
+El plan gratuito de Gemini da **20 peticiones al día y por modelo**, bastante menos de lo que permite la aplicación. LiteLLM levanta un proxy que reparte entre los tres modelos y reintenta con otro cuando uno agota su cuota; también permite mezclar proveedores distintos.
 
 ```bash
-pkill -f "node.*server.js" && pkill -f "vite"
+docker compose up -d                            # el proxy queda en :4000
+curl http://localhost:4000/health/liveliness    # comprobar que responde
 ```
+
+Con **Docker Desktop** en Linux el demonio va como servicio de usuario, así que no hace falta `sudo`:
+
+```bash
+systemctl --user start docker-desktop
+```
+
+Después, en `backend/.env`, apunta el backend al proxy y usa uno de los alias declarados en `litellm_config.yaml`:
+
+```env
+AI_BASE_URL=http://localhost:4000/v1
+AI_MODEL=equilibrado                            # rapido | equilibrado | calidad
+AI_API_KEY=sk-local-redactor-ia
+```
+
+Para volver al modo directo, comenta esas tres líneas y descomenta las de arriba: la aplicación deja de depender de Docker.
 
 ---
 
 ## Pruebas
 
 ```bash
-npm test --prefix backend     # lógica del backend (37 pruebas)
-npm test --prefix frontend    # utilidades del frontend (18 pruebas)
-node e2e/run.mjs              # de principio a fin, en un navegador real
+npm test --prefix backend     # 43 pruebas de la lógica del backend
+npm test --prefix frontend    # 18 pruebas de las utilidades del frontend
+node e2e/run.mjs              # 41 comprobaciones de principio a fin
+node e2e/run.mjs --sin-ia     # las mismas, simulando la IA para no gastar cuota
 ```
 
-Las dos primeras usan el runner que trae Node, sin dependencias añadidas, y
-cubren lo que más fácil se rompe en silencio: la validación de entrada, la
-limpieza del título que devuelve la IA, la traducción de errores del proveedor
-y la comparación palabra a palabra.
+Las unitarias usan el runner que trae Node, sin dependencias añadidas. Cubren lo que se rompe en silencio: la validación de entrada, la limpieza del título que devuelve la IA, la traducción de errores del proveedor y la comparación palabra a palabra.
 
-La prueba de principio a fin arranca el backend y el frontend en puertos
-propios, abre un navegador y recorre el flujo completo: escribir, reformular
-con atajo de teclado, copiar, generar variantes, comparar, renombrar,
-historial, persistencia al recargar, límite de caracteres, los dos idiomas,
-límite agotado, caída de red y el cajón del historial en móvil.
-
-```bash
-node e2e/run.mjs --sin-ia     # sin gastar cuota: simula las respuestas de la IA
-```
-
-Necesita un Chromium; lo busca en el caché de Playwright, en el sistema o en
-la variable `CHROME_PATH`.
+La prueba de principio a fin arranca backend y frontend en puertos propios, abre un navegador real y recorre el flujo entero, incluidos los caminos de error: límite agotado, caída de red y el cajón del historial en móvil. Necesita un Chromium, que busca en el caché de Playwright, en el sistema o en `CHROME_PATH`.
 
 ---
 
-## Limites de uso
+## Límites de uso
 
-Para evitar abuso de la API de IA, el backend aplica rate limiting por IP:
+El backend limita por IP para que la clave de IA no se agote:
 
-- **8 intentos** por ventana de 15 minutos
-- **40 intentos** por día (reset a medianoche)
-- Máximo **500 caracteres** por texto de entrada
+- **8 reformulaciones** por tramo de 15 minutos
+- **40 al día**, contando el día natural en Europa/Madrid
+- **500 caracteres** por texto
 
-El frontend sincroniza estos contadores con `GET /api/limits` al cargar y con la respuesta de cada reformulación, así que lo que se muestra en pantalla siempre viene del servidor.
+Los contadores que ve el usuario vienen siempre del servidor: se piden al cargar y se actualizan con la respuesta de cada reformulación. El recuento vive en memoria, así que se reinicia al reiniciar el servidor.
+
+Ten en cuenta que el límite real puede ser el del proveedor: en el plan gratuito de Gemini son 20 peticiones diarias por modelo, y la primera reformulación de cada documento gasta dos (el texto y su título).
+
+---
+
+## Cómo está montado
+
+| | |
+|---|---|
+| **Frontend** | React 19 sobre Vite, con CSS propio (tokens en `index.css`, sin framework de utilidades) e i18next para los dos idiomas. El historial vive en `localStorage`. |
+| **Backend** | Node.js con Express 5, Helmet y CORS. Cliente de IA propio contra cualquier API compatible con OpenAI. |
+| **Tipografías** | Public Sans para la interfaz, Newsreader para el texto redactado y JetBrains Mono para contadores y metadatos. |
+
+```
+redactor-ia/
+├── frontend/src/
+│   ├── components/     AppHeader, HistoryRail, UsagePanel, DocumentHeader,
+│   │                   SourceSection, ResultSection, DiffView, StyleRail
+│   ├── pages/          Home.jsx — estado del documento en edición
+│   ├── hooks/          useDocuments (historial), useCountdown (reinicio del tramo)
+│   ├── utils/          diffWords (comparación), documents (nombres y agrupación)
+│   ├── services/       Llamadas al backend
+│   ├── locales/        es.json / en.json
+│   ├── constants/      Tonos y límites
+│   └── index.css       Tokens de diseño y estilos de toda la interfaz
+├── backend/src/
+│   ├── routes/         POST /api/rewrite, GET /api/limits
+│   ├── controllers/    Orquestación de la reformulación
+│   ├── services/       Cliente de IA
+│   ├── middlewares/    Límites de uso y manejo de errores
+│   └── utils/          Prompts, validación y limpieza del título
+├── e2e/                Prueba de principio a fin
+├── docker-compose.yml  Proxy LiteLLM (opcional)
+└── litellm_config.yaml Modelos y reintentos entre ellos
+```
+
+### API
+
+| Método y ruta | Qué hace |
+|---|---|
+| `GET /health` | Comprueba que el servidor responde |
+| `GET /api/limits` | Estado de los límites, sin consumir intentos |
+| `POST /api/rewrite` | Reformula un texto y, si se pide, propone su nombre |
