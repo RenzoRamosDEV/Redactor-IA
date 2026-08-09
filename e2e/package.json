@@ -1,0 +1,13 @@
+{
+  "name": "e2e",
+  "private": true,
+  "type": "module",
+  "description": "Prueba de principio a fin: arranca la aplicación y la recorre en un navegador real",
+  "scripts": {
+    "test": "node run.mjs",
+    "test:sin-ia": "node run.mjs --sin-ia"
+  },
+  "devDependencies": {
+    "playwright-core": "^1.56.1"
+  }
+}
