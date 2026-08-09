@@ -25,6 +25,13 @@ test('quita el prefijo "Título:" con y sin tilde', () => {
   assert.strictEqual(cleanTitle('Title: Delay notice'), 'Delay notice');
 });
 
+test('quita las marcas de markdown con las que el modelo lo envuelve', () => {
+  assert.strictEqual(cleanTitle('**Aviso de retraso**'), 'Aviso de retraso');
+  assert.strictEqual(cleanTitle('## Título con almohadillas'), 'Título con almohadillas');
+  assert.strictEqual(cleanTitle('Reagendación de reunión del martes*'), 'Reagendación de reunión del martes');
+  assert.strictEqual(cleanTitle('**Título: Aviso de retraso**'), 'Aviso de retraso');
+});
+
 test('quita el punto final y la puntuación colgante', () => {
   assert.strictEqual(cleanTitle('Aviso de retraso.'), 'Aviso de retraso');
   assert.strictEqual(cleanTitle('Aviso de retraso,'), 'Aviso de retraso');
