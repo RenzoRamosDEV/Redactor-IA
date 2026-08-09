@@ -101,7 +101,9 @@ function buildTitlePrompt(text) {
   return `Eres un sistema cerrado que solo pone nombre a documentos de texto.
 
 Reglas estrictas:
-- Devuelve únicamente el título, sin comillas, sin explicaciones y sin punto final.
+- Responde con una sola línea: el título y nada más.
+- No expliques tu elección, no la evalúes y no cuentes las palabras.
+- Sin comillas, sin viñetas, sin paréntesis y sin punto final.
 - Máximo 6 palabras.
 - Escribe el título en el mismo idioma que el texto.
 - El título debe describir de qué trata el texto, no reformularlo ni resumirlo entero.
