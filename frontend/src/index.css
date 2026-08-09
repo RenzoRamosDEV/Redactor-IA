@@ -312,6 +312,19 @@ h3 {
    Raíl izquierdo · Historial
    ───────────────────────────────────────────── */
 
+/* Bloque de uso, encima del historial. El raíl no tiene padding lateral
+   propio (las entradas del historial ocupan todo el ancho para poder
+   resaltarse enteras), así que se lo pone cada bloque. */
+.rail-usage {
+  padding: 0 20px 20px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 20px;
+}
+
+.rail-usage .usage-meter:last-of-type {
+  margin-bottom: 12px;
+}
+
 .history-head {
   display: flex;
   align-items: center;
@@ -884,6 +897,10 @@ h3 {
 
 .field-block {
   margin-bottom: 28px;
+}
+
+.field-block--last {
+  margin-bottom: 0;
 }
 
 .field-row {

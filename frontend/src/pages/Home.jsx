@@ -344,6 +344,8 @@ export default function Home() {
           activeId={doc.id}
           onSelect={handleSelectDocument}
           onNew={handleNewDocument}
+          usage={usage}
+          limits={limits}
         />
 
         <div
@@ -391,8 +393,6 @@ export default function Home() {
           onExtraInstructionChange={extraInstruction =>
             updateDoc({ extraInstruction })
           }
-          usage={usage}
-          limits={limits}
         />
       </div>
     </div>

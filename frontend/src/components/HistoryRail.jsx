@@ -5,6 +5,7 @@
  */
 
 import { useTranslation } from 'react-i18next';
+import UsagePanel from './UsagePanel';
 import { formatTime, groupByDay } from '../utils/documents';
 
 /**
@@ -13,8 +14,17 @@ import { formatTime, groupByDay } from '../utils/documents';
  * @param {string|null} props.activeId - Documento abierto ahora mismo
  * @param {Function} props.onSelect - Recibe el id del documento elegido
  * @param {Function} props.onNew - Empieza un documento en blanco
+ * @param {Object} props.usage - Consumo de intentos
+ * @param {Object} props.limits - Estado de límites del backend
  */
-export default function HistoryRail({ documents, activeId, onSelect, onNew }) {
+export default function HistoryRail({
+  documents,
+  activeId,
+  onSelect,
+  onNew,
+  usage,
+  limits,
+}) {
   const { t, i18n } = useTranslation();
   const language = i18n.resolvedLanguage || 'es';
 
@@ -26,6 +36,8 @@ export default function HistoryRail({ documents, activeId, onSelect, onNew }) {
 
   return (
     <aside className="rail rail--left om-scroll" aria-label={t('history.title')}>
+      <UsagePanel usage={usage} limits={limits} />
+
       <div className="history-head">
         <span className="eyebrow">{t('history.title')}</span>
         <button type="button" className="history-new" onClick={onNew}>
