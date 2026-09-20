@@ -1,8 +1,18 @@
+<div align="center">
+
 # Redactor IA
 
-Aplicación web para reformular textos con inteligencia artificial. Pegas un texto, eliges el tono y recibes una versión reescrita, con la posibilidad de comparar ambas palabra por palabra y de guardar cada documento en un historial.
+**Pegas un texto, eliges el tono y recibes una versión reescrita.**
 
-![La aplicación](docs/preview.png)
+Con comparación palabra por palabra, versiones acumuladas e historial en el navegador.
+
+![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white)
+![Vite](https://img.shields.io/badge/Vite-5-646CFF?logo=vite&logoColor=white)
+![Node.js](https://img.shields.io/badge/Node.js-20+-339933?logo=nodedotjs&logoColor=white)
+![Express](https://img.shields.io/badge/Express-5-000000?logo=express&logoColor=white)
+![Gemini](https://img.shields.io/badge/Gemini-API_compatible_OpenAI-8E75B2?logo=googlegemini&logoColor=white)
+
+</div>
 
 ---
 
@@ -13,17 +23,34 @@ Aplicación web para reformular textos con inteligencia artificial. Pegas un tex
 - **Acepta una instrucción libre** («más cercano, sin tecnicismos…») que se suma al tono.
 - **Nombra el documento** con la propia IA, una sola vez por documento, y el nombre se puede cambiar a mano.
 - **Acumula variantes** del mismo texto (`v1`, `v2`…) para poder volver a cualquiera.
-- **Compara** el original y el resultado marcando lo eliminado y lo añadido.
+- **Compara** original y resultado marcando lo eliminado y lo añadido.
 - **Guarda un historial** por días, en el navegador, con los 40 documentos más recientes.
 - **Habla español e inglés**, y se adapta de escritorio a móvil.
+
+---
+
+## La aplicación
+
+<div align="center">
+
+<img src="docs/screenshots/resultado.jpg" alt="Espacio de trabajo con el texto original, el resultado reformulado, el nombre propuesto por la IA y los controles de tono e intensidad" width="100%">
+
+</div>
+
+| Documento en blanco | Comparación |
+|:---:|:---:|
+| <img src="docs/screenshots/vacio.jpg" alt="Estado inicial con el contador de intentos, el historial vacío y los controles de estilo" width="100%"> | <img src="docs/screenshots/comparar.jpg" alt="Vista de comparación enfrentando original y reformulado, con lo eliminado tachado en rojo y lo añadido marcado en verde" width="100%"> |
+| Consumo de intentos, historial y estilo, antes de escribir nada. | Lo eliminado tachado, lo añadido marcado, y el recuento de ambos. |
 
 ### Cómo se organiza la interfaz
 
 Un espacio de trabajo de tres columnas:
 
-- **Izquierda.** Consumo de intentos con el tiempo que falta para recuperarlos, y debajo el historial agrupado por día. Solo se guardan los documentos que tienen algún resultado. Por debajo de 1280 px pasa a ser un cajón lateral.
-- **Centro.** El documento: su nombre, el texto original con contador de caracteres y el resultado. Mientras se escribe, el nombre se deriva de la primera frase; en la primera reformulación lo sustituye el que propone la IA. Las siguientes generaciones se acumulan como versiones, y la pestaña *Comparar* enfrenta original y resultado.
-- **Derecha.** Tono, intensidad, longitud e instrucción extra.
+| Columna | Contenido |
+|---|---|
+| **Izquierda** | Consumo de intentos con el tiempo que falta para recuperarlos, y debajo el historial agrupado por día. Solo se guardan los documentos con algún resultado. Por debajo de 1280 px pasa a ser un cajón lateral |
+| **Centro** | El documento: nombre, texto original con contador de caracteres y resultado. Mientras se escribe, el nombre se deriva de la primera frase; en la primera reformulación lo sustituye el que propone la IA. Las siguientes generaciones se acumulan como versiones |
+| **Derecha** | Tono, intensidad, longitud e instrucción extra |
 
 Atajo: `⌘/Ctrl + Enter` reformula sin salir del área de texto.
 
@@ -45,7 +72,8 @@ cp backend/.env.example backend/.env    # y rellena GEMINI_API_KEY
 node backend/src/server.js & npm run dev --prefix frontend
 ```
 
-La aplicación queda en **http://localhost:5173/redactor-ia/** — con la barra final: `/redactor-ia/` es la ruta base configurada en Vite, y sin ella Vite devuelve un 404.
+> [!IMPORTANT]
+> La aplicación queda en **http://localhost:5173/redactor-ia/** — con la barra final. `/redactor-ia/` es la ruta base configurada en Vite, y sin ella Vite devuelve un 404.
 
 Para parar:
 
@@ -71,15 +99,14 @@ AI_MODEL=gemini-3.5-flash
 AI_REASONING_EFFORT=low
 ```
 
-Los tres modelos preparados:
-
 | `AI_MODEL` | Cuándo |
 |---|---|
 | `gemini-flash-lite-latest` | Prima la velocidad |
 | `gemini-3.5-flash` | Equilibrado (por defecto) |
 | `gemini-3.6-flash` | Prima la calidad |
 
-`AI_REASONING_EFFORT` limita cuánto razona el modelo antes de responder. Conviene dejarlo en `low`: ese razonamiento consume el mismo presupuesto de tokens que la respuesta, y con valores altos los títulos llegan vacíos y las reformulaciones cortadas a media frase.
+> [!WARNING]
+> Conviene dejar `AI_REASONING_EFFORT` en `low`. Ese razonamiento consume el mismo presupuesto de tokens que la respuesta, y con valores altos los títulos llegan vacíos y las reformulaciones cortadas a media frase.
 
 ### Varios modelos a la vez, con LiteLLM (opcional)
 
@@ -96,7 +123,7 @@ Con **Docker Desktop** en Linux el demonio va como servicio de usuario, así que
 systemctl --user start docker-desktop
 ```
 
-Después, en `backend/.env`, apunta el backend al proxy y usa uno de los alias declarados en `litellm_config.yaml`:
+Después, en `backend/.env`, apunta el backend al proxy y usa uno de los alias de `litellm_config.yaml`:
 
 ```env
 AI_BASE_URL=http://localhost:4000/v1
@@ -105,6 +132,22 @@ AI_API_KEY=sk-local-redactor-ia
 ```
 
 Para volver al modo directo, comenta esas tres líneas y descomenta las de arriba: la aplicación deja de depender de Docker.
+
+---
+
+## Límites de uso
+
+El backend limita por IP para que la clave de IA no se agote:
+
+| Límite | Valor |
+|---|---|
+| Reformulaciones por tramo de 15 minutos | **8** |
+| Reformulaciones al día (día natural, Europa/Madrid) | **40** |
+| Caracteres por texto | **500** |
+
+Los contadores que ve el usuario vienen siempre del servidor: se piden al cargar y se actualizan con la respuesta de cada reformulación. El recuento vive en memoria, así que se reinicia al reiniciar el servidor.
+
+El límite real puede ser el del proveedor: en el plan gratuito de Gemini son 20 peticiones diarias por modelo, y la primera reformulación de cada documento gasta dos, el texto y su título.
 
 ---
 
@@ -123,27 +166,13 @@ La prueba de principio a fin arranca backend y frontend en puertos propios, abre
 
 ---
 
-## Límites de uso
-
-El backend limita por IP para que la clave de IA no se agote:
-
-- **8 reformulaciones** por tramo de 15 minutos
-- **40 al día**, contando el día natural en Europa/Madrid
-- **500 caracteres** por texto
-
-Los contadores que ve el usuario vienen siempre del servidor: se piden al cargar y se actualizan con la respuesta de cada reformulación. El recuento vive en memoria, así que se reinicia al reiniciar el servidor.
-
-Ten en cuenta que el límite real puede ser el del proveedor: en el plan gratuito de Gemini son 20 peticiones diarias por modelo, y la primera reformulación de cada documento gasta dos (el texto y su título).
-
----
-
 ## Cómo está montado
 
 | | |
 |---|---|
-| **Frontend** | React 19 sobre Vite, con CSS propio (tokens en `index.css`, sin framework de utilidades) e i18next para los dos idiomas. El historial vive en `localStorage`. |
-| **Backend** | Node.js con Express 5, Helmet y CORS. Cliente de IA propio contra cualquier API compatible con OpenAI. |
-| **Tipografías** | Public Sans para la interfaz, Newsreader para el texto redactado y JetBrains Mono para contadores y metadatos. |
+| **Frontend** | React 19 sobre Vite, con CSS propio (tokens en `index.css`, sin framework de utilidades) e i18next para los dos idiomas. El historial vive en `localStorage` |
+| **Backend** | Node.js con Express 5, Helmet y CORS. Cliente de IA propio contra cualquier API compatible con OpenAI |
+| **Tipografías** | Public Sans para la interfaz, Newsreader para el texto redactado y JetBrains Mono para contadores y metadatos |
 
 ```
 redactor-ia/
